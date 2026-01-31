@@ -1,4 +1,7 @@
+import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+
 export class UpdateStockDto {
-  id: string;
+  @IsNotEmpty()
+  @IsNumber()
   amount: number;
 }
