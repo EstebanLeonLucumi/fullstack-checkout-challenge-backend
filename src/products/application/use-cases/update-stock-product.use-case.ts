@@ -21,9 +21,9 @@ export class UpdateStockProductUseCase {
       throw new Error('No se puede actualizar un producto que no existe');
     }
 
-    product.decreaseStock(input.amount);
+    const productWithStockDecreased = product.decreaseStock(input.amount);
 
-    const updatedProduct = await this.productRepository.update(product);
+    const updatedProduct = await this.productRepository.update(productWithStockDecreased);
 
     return updatedProduct;
   }
