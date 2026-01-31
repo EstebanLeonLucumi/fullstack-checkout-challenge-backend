@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Currency {
+  COP
+  USD
+}
+
+enum TransactionStatus {
+  PENDING
+  APPROVED
+  DECLINED
+  ERROR
+}
+
+model Product {
+  id          String @id @default(uuid())
+  name        String
+  description String
+
+  amount   Int
+  currency Currency @default(COP)
+
+  image     String
+  stock     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactionProduct TransactionProduct[]
+}
+
+model Transaction {
+  id     String            @id @default(uuid())
+  status TransactionStatus @default(PENDING)
+
+  subtotal    Int
+  baseFee     Int
+  deliveryFee Int
+  totalAmount Int
+
+  currency Currency @default(COP)
+
+  customerId String
+  deliveryId String?
+
+  wompiTransactionId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customer Customer  @relation(fields: [customerId], references: [id])
+  delivery Delivery? @relation(fields: [deliveryId], references: [id])
+
+  products TransactionProduct[]
+}
+
+model TransactionProduct {
+  id            String @id @default(uuid())
+  productId     String
+  transactionId String
+
+  quantity    Int
+  unitPrice   Int
+  totalAmount Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product     Product     @relation(fields: [productId], references: [id])
+  transaction Transaction @relation(fields: [transactionId], references: [id])
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  transactions Transaction[]
+  deliveries   Delivery[]
+}
+
+model Delivery {
+  id         String @id @default(uuid())
+  customerId String
+
+  address String
+  city    String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  transactions Transaction[]
+}
