@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Param, Patch } from '@nestjs/common';
 import { UpdateStockProductService } from 'src/products/application/services/update-stock-product.service';
 import { UpdateStockDto } from '../dto/update-stock.dto';
 
@@ -8,8 +8,17 @@ export class ProductController {
     private readonly updateStockProductService: UpdateStockProductService,
   ) {}
 
-  @Post()
-  async updateStockProduct(@Body() request: UpdateStockDto) {
-    return this.updateStockProductService.execute(request);
+  @Patch(':id/update-stock')
+  async updateStockProduct(
+    @Param('id') id: string,
+    @Body() request: UpdateStockDto
+  ) {
+    const updatedProduct =
+      await this.updateStockProductService.execute(id, request);
+
+    return {
+      data: updatedProduct,
+      operation: 'STOCK_UPDATED',
+    };
   }
 }
