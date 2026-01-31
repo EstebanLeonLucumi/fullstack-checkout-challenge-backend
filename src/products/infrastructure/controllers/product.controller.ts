@@ -9,7 +9,7 @@ export class ProductController {
   ) {}
 
   @Post()
-  async createProduct(@Body() request: UpdateStockDto) {
+  async updateStockProduct(@Body() request: UpdateStockDto) {
     return this.updateStockProductService.execute(request);
   }
 }
