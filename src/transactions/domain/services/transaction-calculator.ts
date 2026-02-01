@@ -3,16 +3,16 @@ import { TransactionProduct } from "../entities/transaction-product.entity";
 import { Currency } from "src/products/domain/value-objects/Currency";
 
 export class TransactionCalculator {
-    static validateSameCurrency(products: TransactionProduct[], currency: string) {
-    for (const item of products) {
+    static validateSameCurrency(transactionProducts: TransactionProduct[], currency: string) {
+    for (const item of transactionProducts) {
       if (item.getUnitPrice().getCurrency() !== currency) {
         throw new Error("Todos los productos deben tener la misma moneda");
       }
     }
   }
 
-  static calculateSubtotal(products: TransactionProduct[], currency: Currency): Money {
-    const subtotalAmount = products.reduce(
+  static calculateSubtotal(transactionProducts: TransactionProduct[], currency: Currency): Money {
+    const subtotalAmount = transactionProducts.reduce(
       (acc, item) => acc + item.getTotalAmount(),
       0,
     );

@@ -9,9 +9,9 @@ export class Transaction {
     private readonly status: TransactionStatus,
     private readonly customerId: string,
     private readonly deliveryId: string | null,
-    private readonly wompiTransactionId: string,
+    private readonly externalTransactionId: string,
 
-    private readonly product: TransactionProduct[],
+    private readonly transactionProducts: TransactionProduct[],
 
     private readonly subtotal: Money,
     private readonly baseFee: Money,
@@ -25,27 +25,26 @@ export class Transaction {
   static create(params: {
     customerId: string;
     deliveryId?: string | null;
-    wompiTransactionId: string;
-    products: TransactionProduct[];
+    externalTransactionId: string;
+    transactionProducts: TransactionProduct[];
     baseFee: Money;
     deliveryFee: Money;
   }): Transaction {
-    if (!params.customerId) 
+    if (!params.customerId)
       throw new Error('El id del cliente es obligatorio');
 
-    if (!params.wompiTransactionId)
+    if (!params.externalTransactionId)
       throw new Error('El id de la transacción es obligatorio');
 
-    if (!params.products?.length)
-      throw new Error('La transacción debe tener al menos un producto');
+    if (!params.transactionProducts?.length)
+      throw new Error('La transacción debe tener al menos un ítem (TransactionProduct)');
 
     const currency = params.baseFee.getCurrency();
 
-    // Validación de moneda consistente
-    TransactionCalculator.validateSameCurrency(params.products, currency);
+    TransactionCalculator.validateSameCurrency(params.transactionProducts, currency);
 
     const subTotal = TransactionCalculator.calculateSubtotal(
-      params.products,
+      params.transactionProducts,
       currency,
     );
 
@@ -60,8 +59,8 @@ export class Transaction {
       TransactionStatus.PENDING,
       params.customerId,
       params.deliveryId ?? null,
-      params.wompiTransactionId,
-      params.products,
+      params.externalTransactionId,
+      params.transactionProducts,
       subTotal,
       params.baseFee,
       params.deliveryFee,
@@ -85,12 +84,12 @@ export class Transaction {
     return this.deliveryId;
   }
 
-  getWompiTransactionId(): string {
-    return this.wompiTransactionId;
+  getExternalTransactionId(): string {
+    return this.externalTransactionId;
   }
 
-  getProducts(): TransactionProduct[] {
-    return this.product;
+  getTransactionProducts(): TransactionProduct[] {
+    return this.transactionProducts;
   }
 
   getSubtotal(): Money {
@@ -115,5 +114,22 @@ export class Transaction {
 
   getUpdatedAt(): Date {
     return this.updatedAt;
+  }
+
+  withStatus(newStatus: TransactionStatus): Transaction {
+    return new Transaction(
+      this.id,
+      newStatus,
+      this.customerId,
+      this.deliveryId,
+      this.externalTransactionId,
+      this.transactionProducts,
+      this.subtotal,
+      this.baseFee,
+      this.deliveryFee,
+      this.totalAmount,
+      this.createdAt,
+      new Date(),
+    );
   }
 }

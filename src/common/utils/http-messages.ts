@@ -7,4 +7,6 @@ export const Messages = {
   PRODUCT_NOT_FOUND: 'Product not found',
   STOCK_UPDATED: 'Stock updated successfully',
   CHECKOUT_SUCCESS: 'Checkout successful',
+  TRANSACTION_CREATED: 'Transaction created successfully',
+  TRANSACTION_FOUND: 'Transaction found successfully',
 };

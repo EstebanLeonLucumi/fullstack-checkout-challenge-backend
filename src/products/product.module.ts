@@ -35,6 +35,7 @@ import { GetAllProductsUseCase } from "./application/use-cases/get-all-products.
         }
     ],
     controllers: [ProductController],
+    exports: [PRODUCT_REPOSITORY, UpdateStockProductUseCase],
 })
 
 export class ProductModule {}

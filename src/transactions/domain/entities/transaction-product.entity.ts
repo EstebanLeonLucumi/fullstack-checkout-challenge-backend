@@ -12,21 +12,22 @@ export class TransactionProduct {
 
     static create(params: {
         productId: string;
-        transactionId: string;
+        transactionId?: string;
         quantity: number;
         unitPrice: Money;
         totalAmount: number;
     }): TransactionProduct {
         if (!params.productId) throw new Error("productId is required");
-        if (!params.transactionId) throw new Error("transactionId is required");
         if (!params.quantity) throw new Error("quantity is required");
         if (!params.unitPrice) throw new Error("unitPrice is required");
         if (!params.totalAmount) throw new Error("totalAmount is required");
 
+        const transactionId = params.transactionId ?? '';
+
         return new TransactionProduct(
             null,
             params.productId,
-            params.transactionId,
+            transactionId,
             params.quantity,
             params.unitPrice,
             params.totalAmount,

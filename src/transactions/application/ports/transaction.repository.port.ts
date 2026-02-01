@@ -1,9 +1,9 @@
-import { Transaction } from "src/transactions/domain/entities/transaction.entity";
+import { Transaction as TransactionEntity } from "src/transactions/domain/entities/transaction.entity";
 
 export interface TransactionRepositoryPort {
-    findById(id: string): Promise<Transaction | null>;
-    findAll(): Promise<Transaction[]>;
-    create(transaction: Transaction): Promise<Transaction>;
-    update(transaction: Transaction): Promise<Transaction>;
-    delete(id: string): Promise<void>;
+    findById(id: string): Promise<TransactionEntity | null>;
+    create(transaction: TransactionEntity): Promise<TransactionEntity>;
+    update(transaction: TransactionEntity): Promise<TransactionEntity>;
 }
+
+export const TRANSACTION_REPOSITORY = Symbol('TRANSACTION_REPOSITORY');

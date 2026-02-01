@@ -13,6 +13,10 @@ import { CreatePaymentTransactionInputDto } from 'src/payment-provider/applicati
 import { PaymentTransactionOutputDto } from 'src/payment-provider/application/output/payment-transaction-output.dto';
 import { PaymentTransactionMapper } from '../mappers/payment-transaction.mapper';
 import { PaymentTransactionResponseDto } from '../dto/payment-transaction-response.dto';
+import { GetTransactionByIdMapper } from '../mappers/get-transaction-by-id.mapper';
+import { GetTransactionByIdInputDto } from 'src/payment-provider/application/input/get-transaction-by-id-input.dto';
+import { GetTransactionByIdOutputDto } from 'src/payment-provider/application/output/get-transaction-by-id-output.dto';
+import { GetTransactionResponseDto } from '../dto/get-transaction-response.dto';
 import { AxiosError } from 'axios';
 import { GetMerchantResponseDto } from '../dto/get-merchant-response.dto';
 import { MerchantOutputDto } from 'src/payment-provider/application/output/merchant-output.dto';
@@ -33,6 +37,7 @@ export class SandboxPaymentProviderAdapter implements PaymentProviderPort {
     private readonly cardTokenMapper: CardTokenMapper,
     private readonly paymentTransactionMapper: PaymentTransactionMapper,
     private readonly merchantMapper: MerchantMapper,
+    private readonly getTransactionByIdMapper: GetTransactionByIdMapper,
   ) {
     this.baseUrl = process.env.PAYMENT_PROVIDER_BASE_URL ?? '';
     this.publicKey = process.env.PAYMENT_PROVIDER_PUBLIC_KEY ?? '';
@@ -206,7 +211,33 @@ export class SandboxPaymentProviderAdapter implements PaymentProviderPort {
     return createHash('sha256').update(signatureRaw).digest('hex');
   }
 
-  getTransactionById(transactionId: string): any {
-    return transactionId;
+  async getTransactionById(
+    input: GetTransactionByIdInputDto,
+  ): Promise<GetTransactionByIdOutputDto> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<GetTransactionResponseDto>(
+          `${this.baseUrl}/transactions/${input.transactionId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${this.privateKey}`,
+              'Content-Type': 'application/json',
+            },
+          },
+        ),
+      );
+      return this.getTransactionByIdMapper.toOutput(response.data);
+    } catch (error) {
+      if (error instanceof AxiosError && error.response) {
+        throw new HttpException(
+          {
+            message: 'Error del proveedor de pagos',
+            providerError: error.response.data,
+          },
+          error.response.status || HttpStatus.BAD_REQUEST,
+        );
+      }
+      throw error;
+    }
   }
 }
