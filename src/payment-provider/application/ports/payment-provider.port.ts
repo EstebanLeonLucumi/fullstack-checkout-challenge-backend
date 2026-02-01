@@ -6,4 +6,7 @@ import { PaymentTransactionOutputDto } from "../output/payment-transaction-outpu
 export interface PaymentProviderPort {
   createCardToken(data: CreateCardTokenInputDto): Promise<CardTokenOutputDto>;
   createPaymentTransaction(data: CreatePaymentTransactionInputDto): Promise<PaymentTransactionOutputDto>;
+  getTransactionById(transactionId: string): Promise<PaymentTransactionOutputDto>;
 }
+
+export const PAYMENT_PROVIDER = Symbol('PAYMENT_PROVIDER');

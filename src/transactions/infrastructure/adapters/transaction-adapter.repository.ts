@@ -24,20 +24,20 @@ export class TransactionAdapterRepository implements TransactionRepositoryPort {
 
     async create(transaction: TransactionEntity): Promise<TransactionEntity> {
 
-        const created = await this.prisma.transaction.create({
-            data: {
-                status: transaction.getStatus(),
-                customerId: transaction.getCustomerId(),
-                deliveryId: transaction.getDeliveryId(),
-                wompiTransactionId: transaction.getWompiTransactionId(),
-                subtotal: transaction.getSubtotal().getAmount(),
-                baseFee: transaction.getBaseFee().getAmount(),
-                deliveryFee: transaction.getDeliveryFee().getAmount(),
-                totalAmount: transaction.getTotalAmount().getAmount(),
-                createdAt: transaction.getCreatedAt(),
-                updatedAt: transaction.getUpdatedAt(),
-            },
-        });
+        // const created = await this.prisma.transaction.create({
+        //     data: {
+        //         status: transaction.getStatus(),
+        //         customerId: transaction.getCustomerId(),
+        //         deliveryId: transaction.getDeliveryId(),
+        //         wompiTransactionId: transaction.getWompiTransactionId(),
+        //         subtotal: transaction.getSubtotal().getAmount(),
+        //         baseFee: transaction.getBaseFee().getAmount(),
+        //         deliveryFee: transaction.getDeliveryFee().getAmount(),
+        //         totalAmount: transaction.getTotalAmount().getAmount(),
+        //         createdAt: transaction.getCreatedAt(),
+        //         updatedAt: transaction.getUpdatedAt(),
+        //     },
+        // });
 
         // const subTotal = this.moneyMapper.toDomainMoney(transaction.getSubtotal());
         // const baseFee = this.moneyMapper.toPrismaMoney(transaction.getBaseFee());
