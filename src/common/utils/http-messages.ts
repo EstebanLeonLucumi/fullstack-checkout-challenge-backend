@@ -4,6 +4,7 @@ export const Messages = {
   PRODUCT_DELETED: 'Product deleted successfully',
   PRODUCT_FOUND: 'Product found successfully',
   PRODUCTS_FOUND: 'Products found successfully',
-  STOCK_UPDATED: 'Stock updated successfully',
   PRODUCT_NOT_FOUND: 'Product not found',
+  STOCK_UPDATED: 'Stock updated successfully',
+  CHECKOUT_SUCCESS: 'Checkout successful',
 };

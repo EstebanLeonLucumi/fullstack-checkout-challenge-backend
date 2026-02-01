@@ -14,27 +14,35 @@ import { PaymentTransactionOutputDto } from 'src/payment-provider/application/ou
 import { PaymentTransactionMapper } from '../mappers/payment-transaction.mapper';
 import { PaymentTransactionResponseDto } from '../dto/payment-transaction-response.dto';
 import { AxiosError } from 'axios';
+import { GetMerchantResponseDto } from '../dto/get-merchant-response.dto';
+import { MerchantOutputDto } from 'src/payment-provider/application/output/merchant-output.dto';
+import { MerchantMapper } from '../mappers/merchant.mapper';
+import { CreateCheckoutRequestDto } from '../dto/create-checkout-request.dto';
+import { createHash } from 'crypto';
 
 @Injectable()
 export class SandboxPaymentProviderAdapter implements PaymentProviderPort {
   private readonly baseUrl: string;
   private readonly publicKey: string;
   private readonly privateKey: string;
+  private readonly paymentType: string = 'CARD';
+  private readonly integrityKey: string;
 
   constructor(
     private readonly httpService: HttpService,
     private readonly cardTokenMapper: CardTokenMapper,
     private readonly paymentTransactionMapper: PaymentTransactionMapper,
+    private readonly merchantMapper: MerchantMapper,
   ) {
     this.baseUrl = process.env.PAYMENT_PROVIDER_BASE_URL ?? '';
     this.publicKey = process.env.PAYMENT_PROVIDER_PUBLIC_KEY ?? '';
     this.privateKey = process.env.PAYMENT_PROVIDER_PRIVATE_KEY ?? '';
+    this.integrityKey = process.env.PAYMENT_PROVIDER_INTEGRITY_KEY ?? '';
   }
 
   async createCardToken(
     data: CreateCardTokenInputDto,
   ): Promise<CardTokenOutputDto> {
-
     const request = this.cardTokenMapper.toRequest(data);
 
     let outPut = null;
@@ -108,6 +116,94 @@ export class SandboxPaymentProviderAdapter implements PaymentProviderPort {
     }
 
     return outPut;
+  }
+
+  async getMerchant(): Promise<MerchantOutputDto> {
+    let outPut = null;
+
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<GetMerchantResponseDto>(
+          `${this.baseUrl}/merchants/${this.publicKey}`,
+          {
+            headers: {
+              Authorization: `Bearer ${this.privateKey}`,
+              'Content-Type': 'application/json',
+            },
+          },
+        ),
+      );
+
+      const apiResponse = response.data;
+      const merchantData = Array.isArray(apiResponse.data)
+        ? apiResponse.data[0]
+        : apiResponse.data;
+
+      outPut = this.merchantMapper.toOutput({ data: merchantData });
+    } catch (error) {
+      if (error instanceof AxiosError && error.response) {
+        throw new HttpException(
+          {
+            message: 'Error del proveedor de pagos',
+            providerError: error.response.data,
+          },
+          error.response.status || HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
+
+    return outPut;
+  }
+
+  async executeCheckout(
+    data: CreateCheckoutRequestDto,
+  ): Promise<PaymentTransactionOutputDto> {
+    const creditCardRequest = {
+      number: data.credit_card.number,
+      exp_month: data.credit_card.exp_month,
+      exp_year: data.credit_card.exp_year,
+      cvc: data.credit_card.cvc,
+      card_holder: data.credit_card.card_holder,
+    };
+
+    const merchant = await this.getMerchant();
+
+    const creditCard = await this.createCardToken(creditCardRequest);
+
+    const signature = this.generateSignature(
+      data.reference,
+      data.amount_in_cents,
+      data.currency,
+    );
+
+    const paymentTransactionRequest = {
+      acceptance_token: merchant.presigned_acceptance_acceptance_token,
+      accept_personal_auth:
+        merchant.presigned_personal_data_auth_acceptance_token,
+      amount_in_cents: data.amount_in_cents,
+      currency: data.currency,
+      customer_email: data.customer_email,
+      reference: data.reference,
+      signature,
+      payment_method: {
+        type: this.paymentType,
+        token: creditCard.token,
+        installments: data.installments,
+      },
+    };
+
+    const paymentTransaction = await this.createPaymentTransaction(
+      paymentTransactionRequest,
+    );
+
+    return paymentTransaction;
+  }
+
+  private generateSignature(reference: string, amount: number, currency: string) {
+    const signatureRaw =
+      reference + amount + currency + this.integrityKey;
+
+    return createHash('sha256').update(signatureRaw).digest('hex');
   }
 
   getTransactionById(transactionId: string): any {
