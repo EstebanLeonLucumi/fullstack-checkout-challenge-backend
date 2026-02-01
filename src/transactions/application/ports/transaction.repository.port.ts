@@ -1,7 +1,7 @@
 import { Transaction } from "src/transactions/domain/entities/transaction.entity";
 
 export interface TransactionRepositoryPort {
-    findById(id: string): Promise<Transaction | null | undefined>;
+    findById(id: string): Promise<Transaction | null>;
     findAll(): Promise<Transaction[]>;
     create(transaction: Transaction): Promise<Transaction>;
     update(transaction: Transaction): Promise<Transaction>;

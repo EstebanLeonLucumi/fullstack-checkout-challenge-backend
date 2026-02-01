@@ -1,7 +1,7 @@
 import { Product as ProductEntity } from "src/products/domain/entities/product.entity";
 
 export interface ProductRepositoryPort {
-    findById(id: string): Promise<ProductEntity | null | undefined>;
+    findById(id: string): Promise<ProductEntity | null>;
     findAll(): Promise<ProductEntity[]>;
     update(product: ProductEntity): Promise<ProductEntity>;
 }

@@ -11,18 +11,10 @@ export class ProductAdapterRepository implements ProductRepositoryPort {
     private readonly productMapper: ProductMapper,
   ) {}
 
-  private readonly products: ProductEntity[] = [];
+  async findById(id: string): Promise<ProductEntity | null> {
+    const product = await this.prisma.product.findUnique({ where: { id } });
 
-  async findById(id: string): Promise<ProductEntity | null | undefined> {
-    const product = await this.prisma.product.findUnique({
-      where: {
-        id,
-      },
-    });
-
-    if (!product) {
-      return null;
-    }
+    if (!product) return null;
 
     const productDomain = this.productMapper.toDomain(product);
 
@@ -30,24 +22,23 @@ export class ProductAdapterRepository implements ProductRepositoryPort {
   }
 
   async findAll(): Promise<ProductEntity[]> {
-    const products = await this.prisma.product.findMany();
+    const productsExists = await this.prisma.product.findMany();
 
-    if (!products) {
+    if (!productsExists) {
       return [];
     }
 
-    products.forEach((product) => {
-      const productDomain = this.productMapper.toDomain(product);
-      this.products.push(productDomain);
-    });
+    const products = productsExists.map((product) =>
+      this.productMapper.toDomain(product),
+    );
 
-    return this.products;
+    return products;
   }
 
   async update(product: ProductEntity): Promise<ProductEntity> {
-    const productToUpdate = this.findById(product.getId());
+    const productExist = await this.findById(product.getId());
 
-    if (!productToUpdate) {
+    if (!productExist) {
       throw new Error('No se puede actualizar un producto que no existe');
     }
 

@@ -14,7 +14,7 @@ export class TransactionAdapterRepository implements TransactionRepositoryPort {
 
     }
 
-    async findById(id: string): Promise<TransactionEntity | null | undefined> {
+    async findById(id: string): Promise<TransactionEntity | null> {
         return undefined;
     }
 
