@@ -55,7 +55,7 @@ model Transaction {
   customerId String
   deliveryId String?
 
-  wompiTransactionId String
+  externalTransactionId String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -84,7 +84,9 @@ model TransactionProduct {
 
 model Customer {
   id        String   @id @default(uuid())
-  name      String
+  email     String   @unique
+  full_name String
+  
   createdAt DateTime @default(now())
 
   transactions Transaction[]

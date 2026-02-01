@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../src/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 const adapter = new PrismaPg({
@@ -12,7 +12,10 @@ const prisma = new PrismaClient({
 async function main() {
   const [mbappe, product] = await prisma.$transaction(async (tx) => {
     const mbappe = await tx.customer.create({
-      data: { name: 'Kylian Mbappe' },
+      data: {
+        email: 'mbappe@mail.com',
+        full_name: 'Kylian Mbappe',
+      },
     });
 
     const product = await tx.product.createMany({
@@ -66,7 +69,7 @@ async function main() {
           image:
             'https://nikeco.vtexassets.com/arquivos/ids/940843-1200-auto?v=639028057227600000&width=1200&height=auto&aspect=true',
           stock: 100,
-        }
+        },
       ],
     });
 

@@ -50,7 +50,7 @@ export type TransactionMinAggregateOutputType = {
   currency: $Enums.Currency | null
   customerId: string | null
   deliveryId: string | null
-  wompiTransactionId: string | null
+  externalTransactionId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -65,7 +65,7 @@ export type TransactionMaxAggregateOutputType = {
   currency: $Enums.Currency | null
   customerId: string | null
   deliveryId: string | null
-  wompiTransactionId: string | null
+  externalTransactionId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -80,7 +80,7 @@ export type TransactionCountAggregateOutputType = {
   currency: number
   customerId: number
   deliveryId: number
-  wompiTransactionId: number
+  externalTransactionId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -111,7 +111,7 @@ export type TransactionMinAggregateInputType = {
   currency?: true
   customerId?: true
   deliveryId?: true
-  wompiTransactionId?: true
+  externalTransactionId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -126,7 +126,7 @@ export type TransactionMaxAggregateInputType = {
   currency?: true
   customerId?: true
   deliveryId?: true
-  wompiTransactionId?: true
+  externalTransactionId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -141,7 +141,7 @@ export type TransactionCountAggregateInputType = {
   currency?: true
   customerId?: true
   deliveryId?: true
-  wompiTransactionId?: true
+  externalTransactionId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -243,7 +243,7 @@ export type TransactionGroupByOutputType = {
   currency: $Enums.Currency
   customerId: string
   deliveryId: string | null
-  wompiTransactionId: string
+  externalTransactionId: string
   createdAt: Date
   updatedAt: Date
   _count: TransactionCountAggregateOutputType | null
@@ -281,7 +281,7 @@ export type TransactionWhereInput = {
   currency?: Prisma.EnumCurrencyFilter<"Transaction"> | $Enums.Currency
   customerId?: Prisma.StringFilter<"Transaction"> | string
   deliveryId?: Prisma.StringNullableFilter<"Transaction"> | string | null
-  wompiTransactionId?: Prisma.StringFilter<"Transaction"> | string
+  externalTransactionId?: Prisma.StringFilter<"Transaction"> | string
   createdAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
   customer?: Prisma.XOR<Prisma.CustomerScalarRelationFilter, Prisma.CustomerWhereInput>
@@ -299,7 +299,7 @@ export type TransactionOrderByWithRelationInput = {
   currency?: Prisma.SortOrder
   customerId?: Prisma.SortOrder
   deliveryId?: Prisma.SortOrderInput | Prisma.SortOrder
-  wompiTransactionId?: Prisma.SortOrder
+  externalTransactionId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   customer?: Prisma.CustomerOrderByWithRelationInput
@@ -320,7 +320,7 @@ export type TransactionWhereUniqueInput = Prisma.AtLeast<{
   currency?: Prisma.EnumCurrencyFilter<"Transaction"> | $Enums.Currency
   customerId?: Prisma.StringFilter<"Transaction"> | string
   deliveryId?: Prisma.StringNullableFilter<"Transaction"> | string | null
-  wompiTransactionId?: Prisma.StringFilter<"Transaction"> | string
+  externalTransactionId?: Prisma.StringFilter<"Transaction"> | string
   createdAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
   customer?: Prisma.XOR<Prisma.CustomerScalarRelationFilter, Prisma.CustomerWhereInput>
@@ -338,7 +338,7 @@ export type TransactionOrderByWithAggregationInput = {
   currency?: Prisma.SortOrder
   customerId?: Prisma.SortOrder
   deliveryId?: Prisma.SortOrderInput | Prisma.SortOrder
-  wompiTransactionId?: Prisma.SortOrder
+  externalTransactionId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.TransactionCountOrderByAggregateInput
@@ -361,7 +361,7 @@ export type TransactionScalarWhereWithAggregatesInput = {
   currency?: Prisma.EnumCurrencyWithAggregatesFilter<"Transaction"> | $Enums.Currency
   customerId?: Prisma.StringWithAggregatesFilter<"Transaction"> | string
   deliveryId?: Prisma.StringNullableWithAggregatesFilter<"Transaction"> | string | null
-  wompiTransactionId?: Prisma.StringWithAggregatesFilter<"Transaction"> | string
+  externalTransactionId?: Prisma.StringWithAggregatesFilter<"Transaction"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Transaction"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Transaction"> | Date | string
 }
@@ -374,7 +374,7 @@ export type TransactionCreateInput = {
   deliveryFee: number
   totalAmount: number
   currency?: $Enums.Currency
-  wompiTransactionId: string
+  externalTransactionId: string
   createdAt?: Date | string
   updatedAt?: Date | string
   customer: Prisma.CustomerCreateNestedOneWithoutTransactionsInput
@@ -392,7 +392,7 @@ export type TransactionUncheckedCreateInput = {
   currency?: $Enums.Currency
   customerId: string
   deliveryId?: string | null
-  wompiTransactionId: string
+  externalTransactionId: string
   createdAt?: Date | string
   updatedAt?: Date | string
   products?: Prisma.TransactionProductUncheckedCreateNestedManyWithoutTransactionInput
@@ -406,7 +406,7 @@ export type TransactionUpdateInput = {
   deliveryFee?: Prisma.IntFieldUpdateOperationsInput | number
   totalAmount?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
-  wompiTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
+  externalTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   customer?: Prisma.CustomerUpdateOneRequiredWithoutTransactionsNestedInput
@@ -424,7 +424,7 @@ export type TransactionUncheckedUpdateInput = {
   currency?: Prisma.EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
   customerId?: Prisma.StringFieldUpdateOperationsInput | string
   deliveryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  wompiTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
+  externalTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   products?: Prisma.TransactionProductUncheckedUpdateManyWithoutTransactionNestedInput
@@ -440,7 +440,7 @@ export type TransactionCreateManyInput = {
   currency?: $Enums.Currency
   customerId: string
   deliveryId?: string | null
-  wompiTransactionId: string
+  externalTransactionId: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -453,7 +453,7 @@ export type TransactionUpdateManyMutationInput = {
   deliveryFee?: Prisma.IntFieldUpdateOperationsInput | number
   totalAmount?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
-  wompiTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
+  externalTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -468,7 +468,7 @@ export type TransactionUncheckedUpdateManyInput = {
   currency?: Prisma.EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
   customerId?: Prisma.StringFieldUpdateOperationsInput | string
   deliveryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  wompiTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
+  externalTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -483,7 +483,7 @@ export type TransactionCountOrderByAggregateInput = {
   currency?: Prisma.SortOrder
   customerId?: Prisma.SortOrder
   deliveryId?: Prisma.SortOrder
-  wompiTransactionId?: Prisma.SortOrder
+  externalTransactionId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -505,7 +505,7 @@ export type TransactionMaxOrderByAggregateInput = {
   currency?: Prisma.SortOrder
   customerId?: Prisma.SortOrder
   deliveryId?: Prisma.SortOrder
-  wompiTransactionId?: Prisma.SortOrder
+  externalTransactionId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -520,7 +520,7 @@ export type TransactionMinOrderByAggregateInput = {
   currency?: Prisma.SortOrder
   customerId?: Prisma.SortOrder
   deliveryId?: Prisma.SortOrder
-  wompiTransactionId?: Prisma.SortOrder
+  externalTransactionId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -661,7 +661,7 @@ export type TransactionCreateWithoutProductsInput = {
   deliveryFee: number
   totalAmount: number
   currency?: $Enums.Currency
-  wompiTransactionId: string
+  externalTransactionId: string
   createdAt?: Date | string
   updatedAt?: Date | string
   customer: Prisma.CustomerCreateNestedOneWithoutTransactionsInput
@@ -678,7 +678,7 @@ export type TransactionUncheckedCreateWithoutProductsInput = {
   currency?: $Enums.Currency
   customerId: string
   deliveryId?: string | null
-  wompiTransactionId: string
+  externalTransactionId: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -707,7 +707,7 @@ export type TransactionUpdateWithoutProductsInput = {
   deliveryFee?: Prisma.IntFieldUpdateOperationsInput | number
   totalAmount?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
-  wompiTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
+  externalTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   customer?: Prisma.CustomerUpdateOneRequiredWithoutTransactionsNestedInput
@@ -724,7 +724,7 @@ export type TransactionUncheckedUpdateWithoutProductsInput = {
   currency?: Prisma.EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
   customerId?: Prisma.StringFieldUpdateOperationsInput | string
   deliveryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  wompiTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
+  externalTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -737,7 +737,7 @@ export type TransactionCreateWithoutCustomerInput = {
   deliveryFee: number
   totalAmount: number
   currency?: $Enums.Currency
-  wompiTransactionId: string
+  externalTransactionId: string
   createdAt?: Date | string
   updatedAt?: Date | string
   delivery?: Prisma.DeliveryCreateNestedOneWithoutTransactionsInput
@@ -753,7 +753,7 @@ export type TransactionUncheckedCreateWithoutCustomerInput = {
   totalAmount: number
   currency?: $Enums.Currency
   deliveryId?: string | null
-  wompiTransactionId: string
+  externalTransactionId: string
   createdAt?: Date | string
   updatedAt?: Date | string
   products?: Prisma.TransactionProductUncheckedCreateNestedManyWithoutTransactionInput
@@ -798,7 +798,7 @@ export type TransactionScalarWhereInput = {
   currency?: Prisma.EnumCurrencyFilter<"Transaction"> | $Enums.Currency
   customerId?: Prisma.StringFilter<"Transaction"> | string
   deliveryId?: Prisma.StringNullableFilter<"Transaction"> | string | null
-  wompiTransactionId?: Prisma.StringFilter<"Transaction"> | string
+  externalTransactionId?: Prisma.StringFilter<"Transaction"> | string
   createdAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Transaction"> | Date | string
 }
@@ -811,7 +811,7 @@ export type TransactionCreateWithoutDeliveryInput = {
   deliveryFee: number
   totalAmount: number
   currency?: $Enums.Currency
-  wompiTransactionId: string
+  externalTransactionId: string
   createdAt?: Date | string
   updatedAt?: Date | string
   customer: Prisma.CustomerCreateNestedOneWithoutTransactionsInput
@@ -827,7 +827,7 @@ export type TransactionUncheckedCreateWithoutDeliveryInput = {
   totalAmount: number
   currency?: $Enums.Currency
   customerId: string
-  wompiTransactionId: string
+  externalTransactionId: string
   createdAt?: Date | string
   updatedAt?: Date | string
   products?: Prisma.TransactionProductUncheckedCreateNestedManyWithoutTransactionInput
@@ -868,7 +868,7 @@ export type TransactionCreateManyCustomerInput = {
   totalAmount: number
   currency?: $Enums.Currency
   deliveryId?: string | null
-  wompiTransactionId: string
+  externalTransactionId: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -881,7 +881,7 @@ export type TransactionUpdateWithoutCustomerInput = {
   deliveryFee?: Prisma.IntFieldUpdateOperationsInput | number
   totalAmount?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
-  wompiTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
+  externalTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   delivery?: Prisma.DeliveryUpdateOneWithoutTransactionsNestedInput
@@ -897,7 +897,7 @@ export type TransactionUncheckedUpdateWithoutCustomerInput = {
   totalAmount?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
   deliveryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  wompiTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
+  externalTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   products?: Prisma.TransactionProductUncheckedUpdateManyWithoutTransactionNestedInput
@@ -912,7 +912,7 @@ export type TransactionUncheckedUpdateManyWithoutCustomerInput = {
   totalAmount?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
   deliveryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  wompiTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
+  externalTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -926,7 +926,7 @@ export type TransactionCreateManyDeliveryInput = {
   totalAmount: number
   currency?: $Enums.Currency
   customerId: string
-  wompiTransactionId: string
+  externalTransactionId: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -939,7 +939,7 @@ export type TransactionUpdateWithoutDeliveryInput = {
   deliveryFee?: Prisma.IntFieldUpdateOperationsInput | number
   totalAmount?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
-  wompiTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
+  externalTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   customer?: Prisma.CustomerUpdateOneRequiredWithoutTransactionsNestedInput
@@ -955,7 +955,7 @@ export type TransactionUncheckedUpdateWithoutDeliveryInput = {
   totalAmount?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
   customerId?: Prisma.StringFieldUpdateOperationsInput | string
-  wompiTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
+  externalTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   products?: Prisma.TransactionProductUncheckedUpdateManyWithoutTransactionNestedInput
@@ -970,7 +970,7 @@ export type TransactionUncheckedUpdateManyWithoutDeliveryInput = {
   totalAmount?: Prisma.IntFieldUpdateOperationsInput | number
   currency?: Prisma.EnumCurrencyFieldUpdateOperationsInput | $Enums.Currency
   customerId?: Prisma.StringFieldUpdateOperationsInput | string
-  wompiTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
+  externalTransactionId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1016,7 +1016,7 @@ export type TransactionSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   currency?: boolean
   customerId?: boolean
   deliveryId?: boolean
-  wompiTransactionId?: boolean
+  externalTransactionId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   customer?: boolean | Prisma.CustomerDefaultArgs<ExtArgs>
@@ -1035,7 +1035,7 @@ export type TransactionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   currency?: boolean
   customerId?: boolean
   deliveryId?: boolean
-  wompiTransactionId?: boolean
+  externalTransactionId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   customer?: boolean | Prisma.CustomerDefaultArgs<ExtArgs>
@@ -1052,7 +1052,7 @@ export type TransactionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   currency?: boolean
   customerId?: boolean
   deliveryId?: boolean
-  wompiTransactionId?: boolean
+  externalTransactionId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   customer?: boolean | Prisma.CustomerDefaultArgs<ExtArgs>
@@ -1069,12 +1069,12 @@ export type TransactionSelectScalar = {
   currency?: boolean
   customerId?: boolean
   deliveryId?: boolean
-  wompiTransactionId?: boolean
+  externalTransactionId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type TransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "status" | "subtotal" | "baseFee" | "deliveryFee" | "totalAmount" | "currency" | "customerId" | "deliveryId" | "wompiTransactionId" | "createdAt" | "updatedAt", ExtArgs["result"]["transaction"]>
+export type TransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "status" | "subtotal" | "baseFee" | "deliveryFee" | "totalAmount" | "currency" | "customerId" | "deliveryId" | "externalTransactionId" | "createdAt" | "updatedAt", ExtArgs["result"]["transaction"]>
 export type TransactionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   customer?: boolean | Prisma.CustomerDefaultArgs<ExtArgs>
   delivery?: boolean | Prisma.Transaction$deliveryArgs<ExtArgs>
@@ -1107,7 +1107,7 @@ export type $TransactionPayload<ExtArgs extends runtime.Types.Extensions.Interna
     currency: $Enums.Currency
     customerId: string
     deliveryId: string | null
-    wompiTransactionId: string
+    externalTransactionId: string
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["transaction"]>
@@ -1545,7 +1545,7 @@ export interface TransactionFieldRefs {
   readonly currency: Prisma.FieldRef<"Transaction", 'Currency'>
   readonly customerId: Prisma.FieldRef<"Transaction", 'String'>
   readonly deliveryId: Prisma.FieldRef<"Transaction", 'String'>
-  readonly wompiTransactionId: Prisma.FieldRef<"Transaction", 'String'>
+  readonly externalTransactionId: Prisma.FieldRef<"Transaction", 'String'>
   readonly createdAt: Prisma.FieldRef<"Transaction", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Transaction", 'DateTime'>
 }

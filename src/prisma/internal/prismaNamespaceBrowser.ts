@@ -99,7 +99,7 @@ export const TransactionScalarFieldEnum = {
   currency: 'currency',
   customerId: 'customerId',
   deliveryId: 'deliveryId',
-  wompiTransactionId: 'wompiTransactionId',
+  externalTransactionId: 'externalTransactionId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -123,7 +123,8 @@ export type TransactionProductScalarFieldEnum = (typeof TransactionProductScalar
 
 export const CustomerScalarFieldEnum = {
   id: 'id',
-  name: 'name',
+  email: 'email',
+  full_name: 'full_name',
   createdAt: 'createdAt'
 } as const
 
