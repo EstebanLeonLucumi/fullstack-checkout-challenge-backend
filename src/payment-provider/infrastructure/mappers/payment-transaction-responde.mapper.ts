@@ -5,8 +5,8 @@ export class PaymentTransactionResponseMapper {
     toPaymentTransactionOutput(paymentTransactionResponse: PaymentTransactionResponseDto): PaymentTransactionOutputDto {
 
         const paymentTransactionOutput: PaymentTransactionOutputDto = {
-            id: paymentTransactionResponse.id,
-            status: paymentTransactionResponse.status,
+            id: paymentTransactionResponse.data.id,
+            created_at: paymentTransactionResponse.data.created_at,
         };
 
         return paymentTransactionOutput;

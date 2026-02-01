@@ -1,4 +1,4 @@
 export interface PaymentTransactionOutputDto {
     id: string;
-    status: string;
+    created_at: string;
 }

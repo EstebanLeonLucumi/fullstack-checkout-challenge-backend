@@ -4,6 +4,8 @@ import { CardTokenMapper } from "./infrastructure/mappers/card-token.mapper";
 import { SandboxPaymentProviderAdapter } from "./infrastructure/adapters/sandbox-payment-provider.adapter";
 import { PAYMENT_PROVIDER } from './application/ports/payment-provider.port';
 import { PaymentProviderController } from "./infrastructure/controller/payment-provider.controller";
+import { PaymentTransactionResponseMapper } from "./infrastructure/mappers/payment-transaction-responde.mapper";
+import { PaymentTransactionMapper } from "./infrastructure/mappers/payment-transaction.mapper";
 
 @Module({
     imports: [
@@ -17,6 +19,8 @@ import { PaymentProviderController } from "./infrastructure/controller/payment-p
     ],
     providers: [
         CardTokenMapper,
+        PaymentTransactionResponseMapper,
+        PaymentTransactionMapper,
         SandboxPaymentProviderAdapter,
         {
             provide: PAYMENT_PROVIDER,
