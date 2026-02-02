@@ -99,6 +99,27 @@ export class CheckoutWithCreateTransactionService {
       throw new BadRequestException(Messages.CUSTOMER_NOT_FOUND_BAD_REQUEST);
     }
 
+    // 1. Create transaction PENDING in backend and obtain transaction number (reference)
+    const transactionInput: CreateTransactionInputDto = {
+      customerId: input.transaction.customerId,
+      deliveryId: input.transaction.deliveryId,
+      externalTransactionId: reference,
+      transactionProducts,
+      baseFee: {
+        amount: this.appConfig.getBaseFee(),
+        currency: this.appConfig.getCurrency(),
+      },
+      deliveryFee: {
+        amount: this.appConfig.getDeliveryFee(),
+        currency: this.appConfig.getCurrency(),
+      },
+    };
+    const created = await this.createTransactionUseCase.execute(transactionInput);
+    this.logger.log(
+      `Transaction created (PENDING): id=${created.getId()} reference=${reference}`,
+    );
+
+    // 2. Call payment provider API to complete the payment
     const amountInCentsWholePesos = Math.floor(amountInCents / 100) * 100;
     const checkoutPayload = {
       ...input.checkout,
@@ -112,7 +133,7 @@ export class CheckoutWithCreateTransactionService {
     try {
       checkoutResult = await this.paymentProvider.executeCheckout(checkoutPayload);
       this.logger.log(
-        `Payment provider checkout success: externalTransactionId=${checkoutResult.id} reference=${reference}`,
+        `Payment provider checkout called: externalTransactionId=${checkoutResult.id} reference=${reference}`,
       );
     } catch (error) {
       this.logger.error(
@@ -122,32 +143,6 @@ export class CheckoutWithCreateTransactionService {
     }
 
     const externalTransactionId = checkoutResult.id;
-    const transactionInput: CreateTransactionInputDto = {
-      customerId: input.transaction.customerId,
-      deliveryId: input.transaction.deliveryId,
-      externalTransactionId,
-      transactionProducts,
-      baseFee: {
-        amount: this.appConfig.getBaseFee(),
-        currency: this.appConfig.getCurrency(),
-      },
-      deliveryFee: {
-        amount: this.appConfig.getDeliveryFee(),
-        currency: this.appConfig.getCurrency(),
-      },
-    };
-    const created = await this.createTransactionUseCase.execute(transactionInput);
-    this.logger.log(
-      `Transaction created (checkout): id=${created.getId()} externalTransactionId=${externalTransactionId}`,
-    );
-
-    for (const item of transactionProducts) {
-      await this.updateStockProductUseCase.execute({
-        id: item.productId,
-        amount: Math.floor(item.quantity),
-      });
-    }
-
     await sleep(INITIAL_WAIT_MS);
 
     const startTime = Date.now();
@@ -212,6 +207,17 @@ export class CheckoutWithCreateTransactionService {
         `Delivery created: deliveryId=${delivery.id} transactionId=${entity.getId()}`,
       );
       entityUpdated = entityUpdated.withDeliveryId(delivery.id);
+
+      // Update stock only when payment is APPROVED
+      for (const item of entity.getTransactionProducts()) {
+        await this.updateStockProductUseCase.execute({
+          id: item.getProductId(),
+          amount: item.getQuantity(),
+        });
+      }
+      this.logger.log(
+        `Stock updated for transactionId=${entity.getId()} (APPROVED)`,
+      );
     }
 
     const updated = await this.transactionRepository.update(entityUpdated);
