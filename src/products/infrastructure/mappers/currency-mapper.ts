@@ -1,5 +1,5 @@
-import { Currency as PrismaCurrency } from '@prisma/client';
-import { Currency as DomainCurrency } from '../../domain/value-objects/Currency';
+import { Currency as PrismaCurrency } from 'src/prisma/client';
+import { Currency as DomainCurrency } from '../../domain/value-objects/currency';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

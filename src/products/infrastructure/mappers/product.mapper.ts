@@ -1,4 +1,4 @@
-import { Product as PrismaProduct } from '@prisma/client';
+import { Product as PrismaProduct } from 'src/prisma/client';
 import { CurrencyMapper } from './currency-mapper';
 import { Product as ProductEntity } from 'src/products/domain/entities/product.entity';
 import { Money } from 'src/products/domain/value-objects/money.vo';

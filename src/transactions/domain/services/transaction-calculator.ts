@@ -1,6 +1,6 @@
 import { Money } from "src/products/domain/value-objects/money.vo";
 import { TransactionProduct } from "../entities/transaction-product.entity";
-import { Currency } from "src/products/domain/value-objects/Currency";
+import { Currency } from 'src/products/domain/value-objects/currency';
 
 export class TransactionCalculator {
     static validateSameCurrency(transactionProducts: TransactionProduct[], currency: string) {
