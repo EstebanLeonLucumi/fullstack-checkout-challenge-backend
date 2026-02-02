@@ -55,7 +55,8 @@ export const ModelName = {
   Transaction: 'Transaction',
   TransactionProduct: 'TransactionProduct',
   Customer: 'Customer',
-  Delivery: 'Delivery'
+  Delivery: 'Delivery',
+  OrderReferenceCounter: 'OrderReferenceCounter'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -143,6 +144,14 @@ export const DeliveryScalarFieldEnum = {
 } as const
 
 export type DeliveryScalarFieldEnum = (typeof DeliveryScalarFieldEnum)[keyof typeof DeliveryScalarFieldEnum]
+
+
+export const OrderReferenceCounterScalarFieldEnum = {
+  id: 'id',
+  nextValue: 'nextValue'
+} as const
+
+export type OrderReferenceCounterScalarFieldEnum = (typeof OrderReferenceCounterScalarFieldEnum)[keyof typeof OrderReferenceCounterScalarFieldEnum]
 
 
 export const SortOrder = {

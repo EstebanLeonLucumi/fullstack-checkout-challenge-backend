@@ -62,3 +62,8 @@ export type Customer = Prisma.CustomerModel
  * 
  */
 export type Delivery = Prisma.DeliveryModel
+/**
+ * Model OrderReferenceCounter
+ * 
+ */
+export type OrderReferenceCounter = Prisma.OrderReferenceCounterModel

@@ -115,3 +115,9 @@ model Delivery {
 
   transactions Transaction[]
 }
+
+// Single-row counter for consecutive order references (order_001, order_002, ...)
+model OrderReferenceCounter {
+  id        String @id @default("singleton")
+  nextValue Int    @default(1)
+}

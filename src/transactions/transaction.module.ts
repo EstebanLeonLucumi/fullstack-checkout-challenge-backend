@@ -9,8 +9,10 @@ import { CheckoutWithCreateTransactionService } from "./application/services/che
 import { TRANSACTION_REPOSITORY } from "./application/ports/transaction.repository.port";
 import { DELIVERY_REPOSITORY } from "./application/ports/delivery.repository.port";
 import { APP_CONFIG } from "./application/ports/app-config.port";
+import { ORDER_REFERENCE } from "./application/ports/order-reference.port";
 import { TransactionAdapterRepository } from "./infrastructure/adapters/transaction-adapter.repository";
 import { DeliveryAdapterRepository } from "./infrastructure/adapters/delivery-adapter.repository";
+import { OrderReferenceAdapter } from "./infrastructure/adapters/order-reference.adapter";
 import { EnvConfigAdapter } from "./infrastructure/adapters/env-config.adapter";
 import { TransactionMapper } from "./infrastructure/mappers/transaction.mapper";
 import { TransactionController } from "./infrastructure/controllers/transaction.controller";
@@ -34,6 +36,10 @@ import { TransactionController } from "./infrastructure/controllers/transaction.
         {
             provide: DELIVERY_REPOSITORY,
             useClass: DeliveryAdapterRepository,
+        },
+        {
+            provide: ORDER_REFERENCE,
+            useClass: OrderReferenceAdapter,
         },
     ],
 })

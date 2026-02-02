@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateTransactionUseCase } from '../use-cases/create-transaction.use-case';
 import { CreateTransactionInputDto } from '../input/create-transaction-input.dto';
 import { CreateTransactionOutputDto } from '../output/create-transaction-output.dto';
 
 @Injectable()
 export class CreateTransactionService {
+  private readonly logger = new Logger(CreateTransactionService.name);
+
   constructor(
     private readonly createTransactionUseCase: CreateTransactionUseCase,
   ) {}
@@ -14,6 +16,9 @@ export class CreateTransactionService {
   ): Promise<CreateTransactionOutputDto> {
     const entity = await this.createTransactionUseCase.execute(input);
     const transactionId = entity.getId();
+    this.logger.log(
+      `Transaction created: id=${transactionId} customerId=${entity.getCustomerId()} status=${entity.getStatus()}`,
+    );
 
     return {
       id: transactionId,

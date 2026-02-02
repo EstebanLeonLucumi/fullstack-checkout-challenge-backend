@@ -1,5 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
+import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 import { PAYMENT_PROVIDER, PaymentProviderPort } from 'src/payment-provider/application/ports/payment-provider.port';
 import { GetTransactionByIdInputDto } from 'src/payment-provider/application/input/get-transaction-by-id-input.dto';
 import { PRODUCT_REPOSITORY, ProductRepositoryPort } from 'src/products/application/ports/product.repository.port';
@@ -14,6 +13,7 @@ import { CreateTransactionOutputDto } from '../output/create-transaction-output.
 import { TransactionStatus } from 'src/transactions/domain/value-objects/transaction-status';
 import { Transaction as TransactionEntity } from 'src/transactions/domain/entities/transaction.entity';
 import { APP_CONFIG, AppConfigPort } from '../ports/app-config.port';
+import { ORDER_REFERENCE, OrderReferencePort } from '../ports/order-reference.port';
 
 const POLL_INTERVAL_MS = 5000;
 const TIMEOUT_MS = 5 * 60 * 1000;
@@ -25,6 +25,8 @@ function sleep(ms: number): Promise<void> {
 
 @Injectable()
 export class CheckoutWithCreateTransactionService {
+  private readonly logger = new Logger(CheckoutWithCreateTransactionService.name);
+
   constructor(
     @Inject(PAYMENT_PROVIDER)
     private readonly paymentProvider: PaymentProviderPort,
@@ -38,6 +40,8 @@ export class CheckoutWithCreateTransactionService {
     private readonly customerRepository: CustomerRepositoryPort,
     @Inject(APP_CONFIG)
     private readonly appConfig: AppConfigPort,
+    @Inject(ORDER_REFERENCE)
+    private readonly orderReference: OrderReferencePort,
     private readonly createTransactionUseCase: CreateTransactionUseCase,
     private readonly updateStockProductUseCase: UpdateStockProductUseCase,
   ) {}
@@ -45,6 +49,11 @@ export class CheckoutWithCreateTransactionService {
   async execute(
     input: CheckoutWithCreateTransactionInputDto,
   ): Promise<CreateTransactionOutputDto> {
+    const reference = await this.orderReference.getNextReference();
+    this.logger.log(
+      `Checkout started: customerId=${input.transaction.customerId} reference=${reference}`,
+    );
+
     const transactionProducts = await Promise.all(
       input.transaction.transactionProducts.map(async (item) => {
         const product = await this.productRepository.findById(item.productId);
@@ -78,11 +87,10 @@ export class CheckoutWithCreateTransactionService {
     const customerId = input.transaction.customerId;
     const customer = await this.customerRepository.findById(customerId);
     if (!customer) {
+      this.logger.warn(`Checkout failed: customer not found customerId=${customerId}`);
       throw new BadRequestException('Cliente no encontrado');
     }
 
-    const reference = `order-${randomUUID()}`;
-    
     const amountInCentsWholePesos = Math.floor(amountInCents / 100) * 100;
     const checkoutPayload = {
       ...input.checkout,
@@ -95,7 +103,13 @@ export class CheckoutWithCreateTransactionService {
     let checkoutResult;
     try {
       checkoutResult = await this.paymentProvider.executeCheckout(checkoutPayload);
+      this.logger.log(
+        `Payment provider checkout success: externalTransactionId=${checkoutResult.id} reference=${reference}`,
+      );
     } catch (error) {
+      this.logger.error(
+        `Payment provider checkout failed: reference=${reference} - ${error instanceof Error ? error.message : String(error)}`,
+      );
       throw error;
     }
 
@@ -115,6 +129,9 @@ export class CheckoutWithCreateTransactionService {
       },
     };
     const created = await this.createTransactionUseCase.execute(transactionInput);
+    this.logger.log(
+      `Transaction created (checkout): id=${created.getId()} externalTransactionId=${externalTransactionId}`,
+    );
 
     for (const item of transactionProducts) {
       await this.updateStockProductUseCase.execute({
@@ -136,11 +153,17 @@ export class CheckoutWithCreateTransactionService {
 
       if (wompiTx.status !== 'PENDING') {
         finalStatus = wompiTx.status;
+        this.logger.log(
+          `Checkout final status: transactionId=${created.getId()} status=${finalStatus}`,
+        );
         break;
       }
 
       if (Date.now() - startTime >= TIMEOUT_MS) {
         finalStatus = TransactionStatus.DECLINED;
+        this.logger.warn(
+          `Checkout timeout: transactionId=${created.getId()} status=DECLINED (timeout)`,
+        );
         break;
       }
 
@@ -175,10 +198,16 @@ export class CheckoutWithCreateTransactionService {
         address.trim(),
         city.trim(),
       );
+      this.logger.log(
+        `Delivery created: deliveryId=${delivery.id} transactionId=${entity.getId()}`,
+      );
       entityUpdated = entityUpdated.withDeliveryId(delivery.id);
     }
 
     const updated = await this.transactionRepository.update(entityUpdated);
+    this.logger.log(
+      `Checkout completed: transactionId=${updated.getId()} status=${updated.getStatus()}`,
+    );
 
     return this.toOutput(updated);
   }
