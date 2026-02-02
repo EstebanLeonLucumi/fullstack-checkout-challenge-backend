@@ -1,3 +1,4 @@
+import { Messages } from 'src/common/utils/messages';
 import { Money } from '../value-objects/money.vo';
 
 export class Product {
@@ -23,16 +24,16 @@ export class Product {
   ): Product {
 
     if (!name?.trim())
-      throw new Error('El nombre del producto no puede estar vacío');
+      throw new Error(Messages.PRODUCT_NAME_REQUIRED);
 
     if (!description?.trim())
-      throw new Error('La descripción del producto no puede estar vacío');
+      throw new Error(Messages.PRODUCT_DESCRIPTION_REQUIRED);
 
     if (!image?.trim())
-      throw new Error('La imagen del producto no puede estar vacío');
+      throw new Error(Messages.PRODUCT_IMAGE_REQUIRED);
 
     if (stock < 0)
-      throw new Error('El stock del producto no puede ser negativo');
+      throw new Error(Messages.PRODUCT_STOCK_NON_NEGATIVE);
 
     return new Product(
       null,
@@ -96,10 +97,10 @@ export class Product {
 
   decreaseStock(amount: number): Product {
     if (amount < 0)
-      throw new Error('La cantidad a decrementar no puede ser negativa');
+      throw new Error(Messages.PRODUCT_DECREMENT_NON_NEGATIVE);
 
     if (this.stock - amount < 0) {
-      throw new Error('No hay stock suficiente para decrementar esa cantidad');
+      throw new Error(Messages.PRODUCT_INSUFFICIENT_STOCK);
     }
 
     return new Product(

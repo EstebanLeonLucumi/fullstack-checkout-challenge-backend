@@ -1,3 +1,4 @@
+import { Messages } from 'src/common/utils/messages';
 import { Money } from "src/products/domain/value-objects/money.vo";
 import { TransactionProduct } from "../entities/transaction-product.entity";
 import { Currency } from 'src/products/domain/value-objects/currency';
@@ -6,7 +7,7 @@ export class TransactionCalculator {
     static validateSameCurrency(transactionProducts: TransactionProduct[], currency: string) {
     for (const item of transactionProducts) {
       if (item.getUnitPrice().getCurrency() !== currency) {
-        throw new Error("Todos los productos deben tener la misma moneda");
+        throw new Error(Messages.TRANSACTION_SAME_CURRENCY);
       }
     }
   }

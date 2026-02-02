@@ -5,7 +5,7 @@ import {
   HttpException,
   Logger,
 } from '@nestjs/common';
-import { Messages } from '../utils/http-messages';
+import { Messages } from '../utils/messages';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -47,13 +47,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
       case 409:
         return Messages.EMAIL_ALREADY_EXISTS;
       case 400:
-        return 'Bad Request';
+        return Messages.BAD_REQUEST;
       case 401:
-        return 'Unauthorized';
+        return Messages.UNAUTHORIZED;
       case 403:
-        return 'Forbidden';
+        return Messages.FORBIDDEN;
       default:
-        return 'An error occurred';
+        return Messages.INTERNAL_ERROR;
     }
   }
 }

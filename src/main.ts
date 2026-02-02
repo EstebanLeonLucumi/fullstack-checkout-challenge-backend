@@ -1,10 +1,11 @@
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { ApiResponseInterceptor } from './common/interceptors/api-response.interceptor';
 import { RequestLoggingInterceptor } from './common/interceptors/request-logging.interceptor';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
+import { Messages } from './common/utils/messages';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,10 +15,18 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
-    })
+      exceptionFactory: (errors) => {
+        const messages = errors.map((e) =>
+          e.constraints ? Object.values(e.constraints).join(', ') : e.property,
+        );
+        return new BadRequestException(
+          messages.length ? messages[0] : Messages.VALIDATION_FAILED,
+        );
+      },
+    }),
   );
 
-  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalFilters(new AllExceptionsFilter());
   app.useGlobalInterceptors(
     new RequestLoggingInterceptor(),
     new ApiResponseInterceptor(),

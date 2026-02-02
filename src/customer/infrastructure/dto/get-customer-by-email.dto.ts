@@ -1,7 +1,8 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
+import { Messages } from 'src/common/utils/messages';
 
 export class GetCustomerByEmailDto {
-  @IsEmail({}, { message: 'El formato del correo no es válido' })
-  @IsNotEmpty({ message: 'El correo es obligatorio' })
+  @IsEmail({}, { message: Messages.VALIDATION_EMAIL_INVALID })
+  @IsNotEmpty({ message: Messages.VALIDATION_EMAIL_REQUIRED })
   email: string;
 }

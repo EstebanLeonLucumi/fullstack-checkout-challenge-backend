@@ -1,4 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Messages } from 'src/common/utils/messages';
 import {
   PRODUCT_REPOSITORY,
   ProductRepositoryPort,
@@ -18,7 +19,7 @@ export class UpdateStockProductUseCase {
     const product = await this.productRepository.findById(input.id);
 
     if (!product) {
-      throw new Error('No se puede actualizar un producto que no existe');
+      throw new NotFoundException(Messages.PRODUCT_NOT_FOUND_CANNOT_UPDATE_STOCK);
     }
 
     const productWithStockDecreased = product.decreaseStock(input.amount);

@@ -1,3 +1,4 @@
+import { Messages } from 'src/common/utils/messages';
 import { Currency } from './currency';
 
 export class Money {
@@ -12,10 +13,10 @@ export class Money {
     static create(amount: number, currency: Currency) {
         const intAmount = Math.floor(Number(amount));
         if (intAmount < 0) {
-            throw new Error('La cantidad de dinero no puede ser negativa');
+            throw new Error(Messages.MONEY_AMOUNT_NON_NEGATIVE);
         }
         if (!currency?.trim()) {
-            throw new Error('El código de moneda no puede estar vacía');
+            throw new Error(Messages.MONEY_CURRENCY_REQUIRED);
         }
         return new Money(intAmount, currency);
     }

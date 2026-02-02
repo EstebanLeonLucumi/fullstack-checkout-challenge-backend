@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Messages } from 'src/common/utils/messages';
 import { ProductRepositoryPort } from 'src/products/application/ports/product.repository.port';
 import { Product as ProductEntity } from 'src/products/domain/entities/product.entity';
 import { PrismaService } from '../../../database/prisma.service';
@@ -39,7 +40,7 @@ export class ProductAdapterRepository implements ProductRepositoryPort {
     const productExist = await this.findById(product.getId());
 
     if (!productExist) {
-      throw new Error('No se puede actualizar un producto que no existe');
+      throw new NotFoundException(Messages.PRODUCT_NOT_FOUND_CANNOT_UPDATE);
     }
 
     const updateProductPrisma = {

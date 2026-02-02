@@ -8,6 +8,7 @@ import {
   Param,
   Post,
 } from '@nestjs/common';
+import { Messages } from 'src/common/utils/messages';
 import { GetCustomerByIdService } from 'src/customer/application/services/get-customer-by-id.service';
 import { GetCustomerByEmailService } from 'src/customer/application/services/get-customer-by-email.service';
 import { CreateCustomerService } from 'src/customer/application/services/create-customer.service';
@@ -43,7 +44,7 @@ export class CustomerController {
     const customer = await this.getCustomerByEmailService.execute(body.email);
 
     if (!customer) {
-      throw new NotFoundException('Cliente no encontrado');
+      throw new NotFoundException(Messages.CUSTOMER_NOT_FOUND);
     }
 
     return {
@@ -57,7 +58,7 @@ export class CustomerController {
     const customer = await this.getCustomerByIdService.execute(id);
 
     if (!customer) {
-      throw new NotFoundException('Cliente no encontrado');
+      throw new NotFoundException(Messages.CUSTOMER_NOT_FOUND);
     }
 
     return {

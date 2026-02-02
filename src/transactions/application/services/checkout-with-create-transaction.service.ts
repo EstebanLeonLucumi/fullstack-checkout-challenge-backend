@@ -1,4 +1,11 @@
-import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { PAYMENT_PROVIDER, PaymentProviderPort } from 'src/payment-provider/application/ports/payment-provider.port';
 import { GetTransactionByIdInputDto } from 'src/payment-provider/application/input/get-transaction-by-id-input.dto';
 import { PRODUCT_REPOSITORY, ProductRepositoryPort } from 'src/products/application/ports/product.repository.port';
@@ -14,6 +21,7 @@ import { TransactionStatus } from 'src/transactions/domain/value-objects/transac
 import { Transaction as TransactionEntity } from 'src/transactions/domain/entities/transaction.entity';
 import { APP_CONFIG, AppConfigPort } from '../ports/app-config.port';
 import { ORDER_REFERENCE, OrderReferencePort } from '../ports/order-reference.port';
+import { Messages } from 'src/common/utils/messages';
 
 const POLL_INTERVAL_MS = 5000;
 const TIMEOUT_MS = 5 * 60 * 1000;
@@ -58,11 +66,11 @@ export class CheckoutWithCreateTransactionService {
       input.transaction.transactionProducts.map(async (item) => {
         const product = await this.productRepository.findById(item.productId);
         if (!product) {
-          throw new Error(`Producto no encontrado: ${item.productId}`);
+          throw new NotFoundException(Messages.PRODUCT_NOT_FOUND_ID(item.productId));
         }
         const quantity = Math.floor(Number(item.quantity));
         if (quantity < 1) {
-          throw new BadRequestException('La cantidad debe ser un entero positivo');
+          throw new BadRequestException(Messages.QUANTITY_MUST_BE_POSITIVE);
         }
         const amount = Math.floor(Number(product.getPrice().getAmount()));
         const totalAmount = Math.floor(quantity * amount);
@@ -88,7 +96,7 @@ export class CheckoutWithCreateTransactionService {
     const customer = await this.customerRepository.findById(customerId);
     if (!customer) {
       this.logger.warn(`Checkout failed: customer not found customerId=${customerId}`);
-      throw new BadRequestException('Cliente no encontrado');
+      throw new BadRequestException(Messages.CUSTOMER_NOT_FOUND_BAD_REQUEST);
     }
 
     const amountInCentsWholePesos = Math.floor(amountInCents / 100) * 100;
@@ -172,7 +180,9 @@ export class CheckoutWithCreateTransactionService {
 
     const entity = await this.transactionRepository.findById(created.getId());
     if (!entity) {
-      throw new Error('Transaction not found after create');
+      throw new InternalServerErrorException(
+        Messages.TRANSACTION_COULD_NOT_BE_UPDATED,
+      );
     }
     const normalizedStatus =
       typeof finalStatus === 'string' ? finalStatus.toUpperCase() : finalStatus;
@@ -183,14 +193,14 @@ export class CheckoutWithCreateTransactionService {
       const customer = await this.customerRepository.findById(customerId);
       if (!customer) {
         throw new BadRequestException(
-          'Cliente no encontrado para crear la entrega',
+          Messages.CUSTOMER_NOT_FOUND_FOR_DELIVERY,
         );
       }
       const address = customer.getAddress();
       const city = customer.getCity();
       if (!address?.trim() || !city?.trim()) {
         throw new BadRequestException(
-          'El cliente debe tener dirección y ciudad registradas para completar la entrega',
+          Messages.ADDRESS_AND_CITY_REQUIRED,
         );
       }
       const delivery = await this.deliveryRepository.create(

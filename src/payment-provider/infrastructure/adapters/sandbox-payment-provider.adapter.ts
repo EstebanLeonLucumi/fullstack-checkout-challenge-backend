@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
 import { CreateCardTokenInputDto } from 'src/payment-provider/application/input/create-card-token-input.dto';
 import { CardTokenOutputDto } from 'src/payment-provider/application/output/card-token-output.dto';
 import { PaymentProviderPort } from 'src/payment-provider/application/ports/payment-provider.port';
@@ -23,9 +23,11 @@ import { MerchantOutputDto } from 'src/payment-provider/application/output/merch
 import { MerchantMapper } from '../mappers/merchant.mapper';
 import { CreateCheckoutRequestDto } from '../dto/create-checkout-request.dto';
 import { createHash } from 'crypto';
+import { Messages } from 'src/common/utils/messages';
 
 @Injectable()
 export class SandboxPaymentProviderAdapter implements PaymentProviderPort {
+  private readonly logger = new Logger(SandboxPaymentProviderAdapter.name);
   private readonly baseUrl: string;
   private readonly publicKey: string;
   private readonly privateKey: string;
@@ -71,14 +73,13 @@ export class SandboxPaymentProviderAdapter implements PaymentProviderPort {
       outPut = this.cardTokenMapper.toOutput(apiResponse);
     } catch (error) {
       if (error instanceof AxiosError && error.response) {
+        this.logger.warn(`Card token failed: ${JSON.stringify(error.response.data)}`);
         throw new HttpException(
-          {
-            message: 'Error del proveedor de pagos',
-            providerError: error.response.data,
-          },
+          Messages.PAYMENT_COULD_NOT_BE_PROCESSED,
           error.response.status || HttpStatus.BAD_REQUEST,
         );
       }
+      throw error;
     }
 
     return outPut;
@@ -110,14 +111,13 @@ export class SandboxPaymentProviderAdapter implements PaymentProviderPort {
       outPut = this.paymentTransactionMapper.toOutput(apiResponse);
     } catch (error) {
       if (error instanceof AxiosError && error.response) {
+        this.logger.warn(`Create transaction failed: ${JSON.stringify(error.response.data)}`);
         throw new HttpException(
-          {
-            message: 'Error del proveedor de pagos',
-            providerError: error.response.data,
-          },
+          Messages.PAYMENT_COULD_NOT_BE_PROCESSED,
           error.response.status || HttpStatus.BAD_REQUEST,
         );
       }
+      throw error;
     }
 
     return outPut;
@@ -147,14 +147,13 @@ export class SandboxPaymentProviderAdapter implements PaymentProviderPort {
       outPut = this.merchantMapper.toOutput({ data: merchantData });
     } catch (error) {
       if (error instanceof AxiosError && error.response) {
+        this.logger.warn(`Get merchant failed: ${JSON.stringify(error.response.data)}`);
         throw new HttpException(
-          {
-            message: 'Error del proveedor de pagos',
-            providerError: error.response.data,
-          },
+          Messages.PAYMENT_COULD_NOT_BE_PROCESSED,
           error.response.status || HttpStatus.BAD_REQUEST,
         );
       }
+      throw error;
     }
 
     return outPut;
@@ -229,11 +228,9 @@ export class SandboxPaymentProviderAdapter implements PaymentProviderPort {
       return this.getTransactionByIdMapper.toOutput(response.data);
     } catch (error) {
       if (error instanceof AxiosError && error.response) {
+        this.logger.warn(`Get transaction by id failed: ${JSON.stringify(error.response.data)}`);
         throw new HttpException(
-          {
-            message: 'Error del proveedor de pagos',
-            providerError: error.response.data,
-          },
+          Messages.PAYMENT_COULD_NOT_BE_PROCESSED,
           error.response.status || HttpStatus.BAD_REQUEST,
         );
       }

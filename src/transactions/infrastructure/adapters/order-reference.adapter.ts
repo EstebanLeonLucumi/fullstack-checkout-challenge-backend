@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
+import { Messages } from 'src/common/utils/messages';
 import { PrismaService } from 'src/database/prisma.service';
 import { OrderReferencePort } from '../../application/ports/order-reference.port';
 
@@ -15,7 +19,9 @@ export class OrderReferenceAdapter implements OrderReferencePort {
         where: { id: COUNTER_ID },
       });
       if (!row) {
-        throw new Error('OrderReferenceCounter not initialized. Run migration and seed.');
+        throw new InternalServerErrorException(
+          Messages.ORDER_REFERENCE_UNAVAILABLE,
+        );
       }
       const updated = await tx.orderReferenceCounter.update({
         where: { id: COUNTER_ID },

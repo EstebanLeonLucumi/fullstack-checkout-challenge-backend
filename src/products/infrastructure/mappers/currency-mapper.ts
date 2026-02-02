@@ -1,3 +1,4 @@
+import { Messages } from 'src/common/utils/messages';
 import { Currency as PrismaCurrency } from 'src/prisma/client';
 import { Currency as DomainCurrency } from '../../domain/value-objects/currency';
 import { Injectable } from '@nestjs/common';
@@ -13,7 +14,7 @@ export class CurrencyMapper {
       case DomainCurrency.USD:
         return DomainCurrency.USD;
       default:
-        throw new Error(`Invalid currency: ${currency}`);
+        throw new Error(Messages.CURRENCY_INVALID(currency));
     }
   }
 

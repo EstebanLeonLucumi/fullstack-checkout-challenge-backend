@@ -1,3 +1,5 @@
+import { Messages } from 'src/common/utils/messages';
+
 export class Customer {
   constructor(
     private readonly id: string,
@@ -15,11 +17,11 @@ export class Customer {
     city: string | null = null,
   ): Customer {
     const trimmedEmail = email?.trim().toLowerCase();
-    if (!trimmedEmail) throw new Error('El correo es obligatorio');
-    if (!fullName?.trim()) throw new Error('El nombre completo es obligatorio');
+    if (!trimmedEmail) throw new Error(Messages.CUSTOMER_EMAIL_REQUIRED);
+    if (!fullName?.trim()) throw new Error(Messages.CUSTOMER_FULL_NAME_REQUIRED);
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(trimmedEmail))
-      throw new Error('El formato del correo no es válido');
+      throw new Error(Messages.VALIDATION_EMAIL_INVALID);
     return new Customer(
       '',
       trimmedEmail,

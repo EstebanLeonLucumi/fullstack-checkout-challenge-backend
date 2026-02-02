@@ -1,3 +1,4 @@
+import { Messages } from 'src/common/utils/messages';
 import { Money } from 'src/products/domain/value-objects/money.vo';
 import { TransactionStatus } from '../value-objects/transaction-status';
 import { TransactionProduct } from './transaction-product.entity';
@@ -31,13 +32,13 @@ export class Transaction {
     deliveryFee: Money;
   }): Transaction {
     if (!params.customerId)
-      throw new Error('El id del cliente es obligatorio');
+      throw new Error(Messages.TRANSACTION_CUSTOMER_ID_REQUIRED);
 
     if (!params.externalTransactionId)
-      throw new Error('El id de la transacción es obligatorio');
+      throw new Error(Messages.TRANSACTION_ID_REQUIRED);
 
     if (!params.transactionProducts?.length)
-      throw new Error('La transacción debe tener al menos un ítem (TransactionProduct)');
+      throw new Error(Messages.TRANSACTION_AT_LEAST_ONE_ITEM);
 
     const currency = params.baseFee.getCurrency();
 

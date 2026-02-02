@@ -6,25 +6,26 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { Messages } from 'src/common/utils/messages';
 
 export class CreateCustomerDto {
-  @IsEmail({}, { message: 'El formato del correo no es válido' })
-  @IsNotEmpty({ message: 'El correo es obligatorio' })
+  @IsEmail({}, { message: Messages.VALIDATION_EMAIL_INVALID })
+  @IsNotEmpty({ message: Messages.VALIDATION_EMAIL_REQUIRED })
   email: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'El nombre completo es obligatorio' })
-  @MinLength(2, { message: 'El nombre debe tener al menos 2 caracteres' })
-  @MaxLength(200, { message: 'El nombre no puede exceder 200 caracteres' })
+  @IsNotEmpty({ message: Messages.VALIDATION_FULL_NAME_REQUIRED })
+  @MinLength(2, { message: Messages.VALIDATION_FULL_NAME_MIN })
+  @MaxLength(200, { message: Messages.VALIDATION_FULL_NAME_MAX })
   fullName: string;
 
   @IsOptional()
   @IsString()
-  @MaxLength(500, { message: 'La dirección no puede exceder 500 caracteres' })
+  @MaxLength(500, { message: Messages.VALIDATION_ADDRESS_MAX })
   address?: string;
 
   @IsOptional()
   @IsString()
-  @MaxLength(100, { message: 'La ciudad no puede exceder 100 caracteres' })
+  @MaxLength(100, { message: Messages.VALIDATION_CITY_MAX })
   city?: string;
 }

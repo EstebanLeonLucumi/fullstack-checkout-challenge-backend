@@ -1,4 +1,5 @@
 import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import { Messages } from 'src/common/utils/messages';
 import {
   CUSTOMER_REPOSITORY,
   CustomerRepositoryPort,
@@ -16,7 +17,7 @@ export class CreateCustomerUseCase {
   async execute(input: CreateCustomerInputDto): Promise<CustomerEntity> {
     const existing = await this.customerRepository.findByEmail(input.email);
     if (existing) {
-      throw new ConflictException('El correo ya está registrado');
+      throw new ConflictException(Messages.EMAIL_ALREADY_EXISTS);
     }
 
     const customer = CustomerEntity.create(

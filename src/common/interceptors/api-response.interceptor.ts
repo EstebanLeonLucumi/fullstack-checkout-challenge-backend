@@ -1,6 +1,6 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common";
 import { map, Observable } from "rxjs";
-import { Messages } from "../utils/http-messages";
+import { Messages } from "../utils/messages";
 
 @Injectable()
 export class ApiResponseInterceptor implements NestInterceptor {
@@ -16,10 +16,11 @@ export class ApiResponseInterceptor implements NestInterceptor {
 
                 const { data, operation } = result || {};
 
-                let message = 'Request processed';
+                let message: string = Messages.REQUEST_PROCESSED;
 
-                if (operation && Messages[operation]) {
-                    message = Messages[operation];
+                const opMessage = operation && (Messages as Record<string, unknown>)[operation];
+                if (opMessage && typeof opMessage === 'string') {
+                    message = opMessage;
                 } else {
 
                     switch (statusCode) {

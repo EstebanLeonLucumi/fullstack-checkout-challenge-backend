@@ -1,3 +1,4 @@
+import { Messages } from 'src/common/utils/messages';
 import { Money } from "src/products/domain/value-objects/money.vo";
 
 export class TransactionProduct {
@@ -17,13 +18,13 @@ export class TransactionProduct {
         unitPrice: Money;
         totalAmount: number;
     }): TransactionProduct {
-        if (!params.productId) throw new Error("productId is required");
-        if (!params.unitPrice) throw new Error("unitPrice is required");
+        if (!params.productId) throw new Error(Messages.TRANSACTION_PRODUCT_ID_REQUIRED);
+        if (!params.unitPrice) throw new Error(Messages.TRANSACTION_PRODUCT_UNIT_PRICE_REQUIRED);
 
         const quantity = Math.floor(Number(params.quantity));
         const totalAmount = Math.floor(Number(params.totalAmount));
-        if (quantity < 1) throw new Error("quantity must be a positive integer");
-        if (totalAmount < 0) throw new Error("totalAmount cannot be negative");
+        if (quantity < 1) throw new Error(Messages.TRANSACTION_PRODUCT_QUANTITY_POSITIVE);
+        if (totalAmount < 0) throw new Error(Messages.TRANSACTION_PRODUCT_TOTAL_AMOUNT_NON_NEGATIVE);
 
         const transactionId = params.transactionId ?? '';
 

@@ -1,4 +1,5 @@
 import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
+import { Messages } from 'src/common/utils/messages';
 import { GetProductByIdService } from 'src/products/application/services/get-product-by-id.service';
 import { GetAllProductsService } from 'src/products/application/services/get-all-products.service';
 
@@ -14,7 +15,7 @@ export class ProductController {
     const product = await this.getProductService.execute(id);
 
     if (!product) {
-      throw new NotFoundException('Producto no encontrado');
+      throw new NotFoundException(Messages.PRODUCT_NOT_FOUND);
     }
 
     return {
