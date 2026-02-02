@@ -19,6 +19,17 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new ApiResponseInterceptor());
 
+  const corsOrigin = process.env.CORS_ORIGIN;
+  const origins = corsOrigin
+    ? corsOrigin.split(',').map((o) => o.trim()).filter(Boolean)
+    : true;
+  app.enableCors({
+    origin: origins,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    credentials: true,
+  });
+
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
 }

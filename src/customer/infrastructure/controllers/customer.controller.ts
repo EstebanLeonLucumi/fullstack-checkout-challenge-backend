@@ -12,6 +12,7 @@ import { GetCustomerByIdService } from 'src/customer/application/services/get-cu
 import { GetCustomerByEmailService } from 'src/customer/application/services/get-customer-by-email.service';
 import { CreateCustomerService } from 'src/customer/application/services/create-customer.service';
 import { CreateCustomerDto } from '../dto/create-customer.dto';
+import { GetCustomerByEmailDto } from '../dto/get-customer-by-email.dto';
 
 @Controller('customers')
 export class CustomerController {
@@ -37,9 +38,9 @@ export class CustomerController {
     };
   }
 
-  @Get('by-email/:email')
-  async getCustomerByEmail(@Param('email') email: string) {
-    const customer = await this.getCustomerByEmailService.execute(email);
+  @Post('by-email')
+  async getCustomerByEmail(@Body() body: GetCustomerByEmailDto) {
+    const customer = await this.getCustomerByEmailService.execute(body.email);
 
     if (!customer) {
       throw new NotFoundException('Cliente no encontrado');
