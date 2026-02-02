@@ -28,7 +28,7 @@ This backend supports a 5-step checkout flow:
 1. **Product page** — List products and stock.
 2. **Credit card & delivery** — Collect payment and delivery data.
 3. **Summary** — Show product amount, base fee, delivery fee, and payment action.
-4. **Final status** — Create transaction (PENDING), call payment provider, update transaction result, assign delivery, update stock.
+4. **Final status** — Create transaction PENDING in backend and obtain order reference → call payment provider → when payment is completed or failed: update transaction with result; **only if APPROVED**: create delivery and update product stock.
 5. **Back to product page** — Show result and updated stock.
 
 The API exposes **products**, **customers**, **transactions**, and **deliveries**, with different HTTP methods (GET, POST) and validations. Sensitive data (e.g. card data) is not persisted; it is sent only to the payment provider (Sandbox).
@@ -169,7 +169,7 @@ Error responses:
 | Method | Path                 | Description                    | Request body | Response |
 |--------|----------------------|--------------------------------|--------------|----------|
 | POST   | `/transactions`      | Create transaction (manual)    | See below    | `data`: transaction |
-| POST   | `/transactions/checkout` | **Checkout**: create PENDING transaction, call payment provider, poll status, update transaction, create delivery if APPROVED, update stock | See below | `data`: created/updated transaction |
+| POST   | `/transactions/checkout` | **Checkout**: (1) Create transaction PENDING and obtain reference, (2) call payment provider, (3) poll until final status, (4) update transaction with result; **only if APPROVED**: create delivery and update stock | See below | `data`: created/updated transaction |
 
 **Checkout body (POST `/transactions/checkout`):**
 
@@ -194,7 +194,7 @@ Error responses:
 }
 ```
 
-Checkout flow (high level): create transaction (PENDING) → call payment provider with card + amount + reference → poll transaction status until APPROVED/DECLINED/ERROR or timeout → update transaction in DB → if APPROVED: create delivery (if customer has address/city), update product stock.
+**Checkout flow:** (1) Create transaction PENDING in backend and obtain order reference. (2) Call payment provider with card, amount, and reference. (3) Poll transaction status until APPROVED, DECLINED, or ERROR (or timeout). (4) Update transaction in DB with result. **Only if status is APPROVED:** create delivery (if customer has address and city) and decrement product stock.
 
 ### Payment provider (internal)
 
@@ -321,10 +321,10 @@ Each bounded context (e.g. `products`, `customer`, `transactions`, `payment-prov
 2. **Credit card & delivery** — User enters card (and delivery) data; frontend may create/load customer via `POST /customers` or `POST /customers/by-email`.
 3. **Summary** — Frontend shows product amount, base fee, delivery fee; user confirms.
 4. **Payment** — Frontend calls `POST /transactions/checkout` with `checkout` (card, installments) and `transaction` (customerId, transactionProducts). Backend:
-   - Creates a PENDING transaction and gets an order reference.
-   - Calls the payment provider (Sandbox) with card tokenization and payment.
-   - Polls transaction status until final state (APPROVED / DECLINED / ERROR) or timeout.
-   - Updates the transaction in DB; if APPROVED, creates delivery (if customer has address/city) and decrements product stock.
+   - Creates a PENDING transaction in the backend and obtains an order reference.
+   - Calls the payment provider (Sandbox) with that reference to complete the payment.
+   - Polls the provider until the transaction reaches a final state (APPROVED, DECLINED, or ERROR) or times out.
+   - Updates the transaction in the DB with the result. **Only if the status is APPROVED:** creates the delivery (when the customer has address and city) and decrements product stock.
 5. **Result** — Backend returns the final transaction; frontend shows success/failure and redirects to product page (stock updated via next `GET /products` or `GET /products/:id`).
 
 ---
