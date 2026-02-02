@@ -348,7 +348,9 @@ The app listens on `process.env.PORT` (default `3000`), suitable for cloud platf
 - **Database:** Run migrations and seed on the target DB using `DATABASE_URL` (public URL for the deployment environment).
 - **Environment:** Set all required env vars (including payment provider Sandbox keys and `CORS_ORIGIN`) in the hosting console.
 
-**Deployed API:** [https://fullstack-checkout-challenge-backend-production.up.railway.app](https://fullstack-checkout-challenge-backend-production.up.railway.app)
+**Deployed API:** [Abrir API en producción](https://fullstack-checkout-challenge-backend-production.up.railway.app)
+
+**Deployed App (frontend):** [Abrir app en producción](https://fullstack-checkout-challenge-fronte.vercel.app/)
 
 ---
 
