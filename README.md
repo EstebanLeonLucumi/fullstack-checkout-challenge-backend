@@ -13,7 +13,6 @@ REST API for a product store checkout flow: catalog, customers, credit-card paym
 - [API Endpoints](#api-endpoints)
 - [Environment Variables](#environment-variables)
 - [Installation & Running](#installation--running)
-- [Tests & Coverage](#tests--coverage)
 - [Project Structure](#project-structure)
 - [Business Flow](#business-flow)
 - [Security & Validation](#security--validation)
@@ -47,7 +46,6 @@ The API exposes **products**, **customers**, **transactions**, and **deliveries*
 | ORM / Client   | Prisma                              |
 | Validation     | class-validator, class-transformer   |
 | HTTP Client    | Axios (@nestjs/axios)               |
-| Tests          | Jest                                |
 
 ---
 
@@ -206,12 +204,11 @@ Checkout flow (high level): create transaction (PENDING) → call payment provid
 
 ---
 
-**Postman / Swagger**
+**Postman**
 
 - **Postman Collection:** [Backend API Collection](https://web.postman.co/workspace/My-Workspace~63dd8361-bae1-4f4c-84f7-6933a27596b6/collection/16004267-5c22f977-c2ab-423c-bcb8-1a239f936048?action=share&source=copy-link&creator=16004267)
-- **Swagger / OpenAPI:** *(If you add Swagger, add the public URL here.)*
 
-Example for local: after running the app, you can import the endpoints above into Postman and set base URL to `http://localhost:3000`.
+Base URL for local: `http://localhost:3000`.
 
 ---
 
@@ -265,13 +262,7 @@ Create a `.env` in the project root (see `.env.example` if present). Required an
      npx prisma migrate deploy
      ```
 
-   - Seed products (dummy data):
-
-     ```bash
-     npx prisma db seed
-     ```
-
-     (If `package.json` has no `prisma.seed`, run the seed script manually, e.g. `npx ts-node prisma/seeder.ts` or as configured.)
+   - Seed products (dummy data): run the seed script, e.g. `npx ts-node prisma/seeder.ts` (with `DATABASE_URL` set).
 
 3. **Configure `.env`**
 
@@ -289,38 +280,6 @@ Create a `.env` in the project root (see `.env.example` if present). Required an
    ```
 
    API base: `http://localhost:3000` (or the port you set).
-
----
-
-## Tests & Coverage
-
-- **Unit tests:** Jest (specs next to source or in `src`).
-- **E2E:** `test/app.e2e-spec.ts` (Jest + Supertest).
-
-Commands:
-
-```bash
-# Unit tests
-yarn run test
-
-# Unit tests with coverage
-yarn run test:cov
-
-# E2E tests
-yarn run test:e2e
-```
-
-**Coverage results:** The evaluation rubric requires **more than 80% coverage** for Backend (and Frontend). After running `yarn run test:cov`, add the coverage summary to this README, for example:
-
-```text
-----------------------|---------|----------|---------|---------|
-File                  | % Stmts | % Branch | % Funcs | % Lines |
-----------------------|---------|----------|---------|---------|
-All files             |   xx.xx |    xx.xx |   xx.xx |   xx.xx |
-----------------------|---------|----------|---------|---------|
-```
-
-*(Paste here the actual output of `yarn run test:cov` or a screenshot/link to the coverage report.)*
 
 ---
 
@@ -378,8 +337,6 @@ Each bounded context (e.g. `products`, `customer`, `transactions`, `payment-prov
 - **Errors:** Global exception filter returns consistent JSON; in production, internal errors do not expose stack traces. All user-facing messages are centralized in English in `src/common/utils/messages.ts`.
 - **Database:** Prisma with parameterized queries; migrations for schema changes.
 
-*(Bonus: OWASP alignments, HTTPS, and security headers can be documented here if applied.)*
-
 ---
 
 ## Deployment
@@ -391,7 +348,7 @@ The app listens on `process.env.PORT` (default `3000`), suitable for cloud platf
 - **Database:** Run migrations and seed on the target DB using `DATABASE_URL` (public URL for the deployment environment).
 - **Environment:** Set all required env vars (including payment provider Sandbox keys and `CORS_ORIGIN`) in the hosting console.
 
-**Deployed API link:** *(Add the public URL of your deployed backend here, e.g. `https://your-api.railway.app` or `https://xxx.execute-api.region.amazonaws.com`.)*
+**Deployed API:** [https://fullstack-checkout-challenge-backend-production.up.railway.app](https://fullstack-checkout-challenge-backend-production.up.railway.app)
 
 ---
 
