@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "src/prisma/prisma.service";
+import { PrismaService } from "../../../prisma/prisma.service";
 import { TransactionRepositoryPort } from "src/transactions/application/ports/transaction.repository.port";
 import { Transaction as TransactionEntity } from "src/transactions/domain/entities/transaction.entity";
 import { TransactionMapper, PrismaTransactionWithProducts } from "../mappers/transaction.mapper";

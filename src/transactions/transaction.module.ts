@@ -1,5 +1,5 @@
 import { Module } from "@nestjs/common";
-import { PrismaModule } from "src/prisma/prisma.module";
+import { PrismaModule } from "../prisma/prisma.module";
 import { PaymentProviderModule } from "src/payment-provider/payment-provider.module";
 import { ProductModule } from "src/products/product.module";
 import { CustomerModule } from "src/customer/customer.module";

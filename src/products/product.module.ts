@@ -3,9 +3,9 @@ import { PRODUCT_REPOSITORY } from "./application/ports/product.repository.port"
 import { ProductAdapterRepository } from "./infrastructure/adapters/product-adapter.repository";
 import { ProductController } from "./infrastructure/controllers/product.controller";
 import { CurrencyMapper } from "./infrastructure/mappers/currency-mapper";
-import { PrismaModule } from "src/prisma/prisma.module";
+import { PrismaModule } from "../prisma/prisma.module";
 import { ProductMapper } from "./infrastructure/mappers/product.mapper";
-import { PrismaService } from "src/prisma/prisma.service";
+import { PrismaService } from "../prisma/prisma.service";
 import { UpdateStockProductUseCase } from "./application/use-cases/update-stock-product.use-case";
 import { GetProductByIdUseCase } from "./application/use-cases/get-product-by-id.use-case";
 import { GetProductByIdService } from "./application/services/get-product-by-id.service";
