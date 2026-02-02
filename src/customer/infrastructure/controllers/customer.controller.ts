@@ -9,6 +9,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { GetCustomerByIdService } from 'src/customer/application/services/get-customer-by-id.service';
+import { GetCustomerByEmailService } from 'src/customer/application/services/get-customer-by-email.service';
 import { CreateCustomerService } from 'src/customer/application/services/create-customer.service';
 import { CreateCustomerDto } from '../dto/create-customer.dto';
 
@@ -16,6 +17,7 @@ import { CreateCustomerDto } from '../dto/create-customer.dto';
 export class CustomerController {
   constructor(
     private readonly getCustomerByIdService: GetCustomerByIdService,
+    private readonly getCustomerByEmailService: GetCustomerByEmailService,
     private readonly createCustomerService: CreateCustomerService,
   ) {}
 
@@ -32,6 +34,20 @@ export class CustomerController {
     return {
       data: customer,
       operation: 'CUSTOMER_CREATED',
+    };
+  }
+
+  @Get('by-email/:email')
+  async getCustomerByEmail(@Param('email') email: string) {
+    const customer = await this.getCustomerByEmailService.execute(email);
+
+    if (!customer) {
+      throw new NotFoundException('Cliente no encontrado');
+    }
+
+    return {
+      data: customer,
+      operation: 'CUSTOMER_FOUND',
     };
   }
 
