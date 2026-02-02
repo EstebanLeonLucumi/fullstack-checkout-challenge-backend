@@ -17,7 +17,7 @@ export class TransactionAdapterRepository implements TransactionRepositoryPort {
     async findById(id: string): Promise<TransactionEntity | null> {
         const tx = await this.prisma.transaction.findUnique({
             where: { id },
-            include: { products: true },
+            include: { transactionProducts: true },
         });
         if (!tx) return null;
         return this.transactionMapper.fromPrismaTransactionWithProducts(
@@ -26,7 +26,7 @@ export class TransactionAdapterRepository implements TransactionRepositoryPort {
     }
 
     async create(transaction: TransactionEntity): Promise<TransactionEntity> {
-
+        const products = transaction.getTransactionProducts();
         const created = await this.prisma.transaction.create({
             data: {
                 status: transaction.getStatus(),
@@ -40,24 +40,39 @@ export class TransactionAdapterRepository implements TransactionRepositoryPort {
                 createdAt: transaction.getCreatedAt(),
                 updatedAt: transaction.getUpdatedAt(),
                 externalTransactionId: transaction.getExternalTransactionId(),
+                transactionProducts: {
+                    create: products.map((p) => ({
+                        productId: p.getProductId(),
+                        quantity: p.getQuantity(),
+                        unitPrice: p.getUnitPrice().getAmount(),
+                        totalAmount: p.getTotalAmount(),
+                    })),
+                },
             },
+            include: { transactionProducts: true },
         });
 
-        return this.transactionMapper.toDomainEntity(created, transaction.getTransactionProducts());
+        return this.transactionMapper.fromPrismaTransactionWithProducts(
+            created as unknown as PrismaTransactionWithProducts,
+        );
     }
 
     async update(transaction: TransactionEntity): Promise<TransactionEntity> {
         const id = transaction.getId();
+        const deliveryId = transaction.getDeliveryId();
         await this.prisma.transaction.update({
             where: { id },
             data: {
                 status: transaction.getStatus(),
                 updatedAt: transaction.getUpdatedAt(),
+                ...(deliveryId != null && {
+                    delivery: { connect: { id: deliveryId } },
+                }),
             },
         });
         const updated = await this.prisma.transaction.findUnique({
             where: { id },
-            include: { products: true },
+            include: { transactionProducts: true },
         });
         if (!updated) return transaction;
         return this.transactionMapper.fromPrismaTransactionWithProducts(

@@ -16,16 +16,15 @@ export class TransactionCalculator {
       (acc, item) => acc + item.getTotalAmount(),
       0,
     );
-
-    return Money.create(subtotalAmount, currency);
+    return Money.create(Math.floor(subtotalAmount), currency);
   }
 
   static calculateTotal(subtotal: Money, baseFee: Money, deliveryFee: Money): Money {
     const currency = subtotal.getCurrency();
-
-    return Money.create(
-      subtotal.getAmount() + baseFee.getAmount() + deliveryFee.getAmount(),
-      currency,
-    );
+    const total =
+      Math.floor(subtotal.getAmount()) +
+      Math.floor(baseFee.getAmount()) +
+      Math.floor(deliveryFee.getAmount());
+    return Money.create(total, currency);
   }
 }

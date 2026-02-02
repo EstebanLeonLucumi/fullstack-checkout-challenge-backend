@@ -7,6 +7,8 @@ import { CustomerMapper } from './infrastructure/mappers/customer.mapper';
 import { GetCustomerByIdMapper } from './infrastructure/mappers/get-customer-by-id.mapper';
 import { GetCustomerByIdUseCase } from './application/use-cases/get-customer-by-id.use-case';
 import { GetCustomerByIdService } from './application/services/get-customer-by-id.service';
+import { CreateCustomerUseCase } from './application/use-cases/create-customer.use-case';
+import { CreateCustomerService } from './application/services/create-customer.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Module({
@@ -15,6 +17,8 @@ import { PrismaService } from 'src/prisma/prisma.service';
     PrismaService,
     GetCustomerByIdUseCase,
     GetCustomerByIdService,
+    CreateCustomerUseCase,
+    CreateCustomerService,
     GetCustomerByIdMapper,
     CustomerMapper,
     {

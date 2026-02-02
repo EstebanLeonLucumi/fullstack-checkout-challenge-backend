@@ -10,20 +10,14 @@ export class Money {
     }
 
     static create(amount: number, currency: Currency) {
-
-        if(!Number.isInteger(amount)) {
-            throw new Error('La cantidad de dinero debe ser un número entero');
-        }
-
-        if (amount < 0) {
+        const intAmount = Math.floor(Number(amount));
+        if (intAmount < 0) {
             throw new Error('La cantidad de dinero no puede ser negativa');
         }
-
         if (!currency?.trim()) {
-            throw new Error('El código de moneda no puede estar vacío');
+            throw new Error('El código de moneda no puede estar vacía');
         }
-
-        return new Money(amount, currency);
+        return new Money(intAmount, currency);
     }
 
     getAmount(): number {

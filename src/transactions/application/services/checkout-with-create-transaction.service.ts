@@ -1,9 +1,11 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { PAYMENT_PROVIDER, PaymentProviderPort } from 'src/payment-provider/application/ports/payment-provider.port';
 import { GetTransactionByIdInputDto } from 'src/payment-provider/application/input/get-transaction-by-id-input.dto';
 import { PRODUCT_REPOSITORY, ProductRepositoryPort } from 'src/products/application/ports/product.repository.port';
 import { TRANSACTION_REPOSITORY, TransactionRepositoryPort } from '../ports/transaction.repository.port';
+import { DELIVERY_REPOSITORY, DeliveryRepositoryPort } from '../ports/delivery.repository.port';
+import { CUSTOMER_REPOSITORY, CustomerRepositoryPort } from 'src/customer/application/ports/customer.repository.port';
 import { CreateTransactionUseCase } from '../use-cases/create-transaction.use-case';
 import { UpdateStockProductUseCase } from 'src/products/application/use-cases/update-stock-product.use-case';
 import { CreateTransactionInputDto } from '../input/create-transaction-input.dto';
@@ -30,6 +32,10 @@ export class CheckoutWithCreateTransactionService {
     private readonly productRepository: ProductRepositoryPort,
     @Inject(TRANSACTION_REPOSITORY)
     private readonly transactionRepository: TransactionRepositoryPort,
+    @Inject(DELIVERY_REPOSITORY)
+    private readonly deliveryRepository: DeliveryRepositoryPort,
+    @Inject(CUSTOMER_REPOSITORY)
+    private readonly customerRepository: CustomerRepositoryPort,
     @Inject(APP_CONFIG)
     private readonly appConfig: AppConfigPort,
     private readonly createTransactionUseCase: CreateTransactionUseCase,
@@ -45,31 +51,45 @@ export class CheckoutWithCreateTransactionService {
         if (!product) {
           throw new Error(`Producto no encontrado: ${item.productId}`);
         }
-        const amount = product.getPrice().getAmount();
+        const quantity = Math.floor(Number(item.quantity));
+        if (quantity < 1) {
+          throw new BadRequestException('La cantidad debe ser un entero positivo');
+        }
+        const amount = Math.floor(Number(product.getPrice().getAmount()));
+        const totalAmount = Math.floor(quantity * amount);
         return {
           productId: item.productId,
-          quantity: item.quantity,
+          quantity,
           unitPrice: { amount, currency: this.appConfig.getCurrency() },
-          totalAmount: item.quantity * amount,
+          totalAmount,
         };
       }),
     );
 
-    const subtotalInCents = transactionProducts.reduce(
-      (acc, item) => acc + item.totalAmount,
-      0,
+    const subtotalInCents = Math.floor(
+      transactionProducts.reduce((acc, item) => acc + item.totalAmount, 0),
     );
-    const amountInCents =
+    const amountInCents = Math.floor(
       subtotalInCents +
-      this.appConfig.getBaseFee() +
-      this.appConfig.getDeliveryFee();
+        Math.floor(this.appConfig.getBaseFee()) +
+        Math.floor(this.appConfig.getDeliveryFee()),
+    );
+
+    const customerId = input.transaction.customerId;
+    const customer = await this.customerRepository.findById(customerId);
+    if (!customer) {
+      throw new BadRequestException('Cliente no encontrado');
+    }
 
     const reference = `order-${randomUUID()}`;
+    
+    const amountInCentsWholePesos = Math.floor(amountInCents / 100) * 100;
     const checkoutPayload = {
       ...input.checkout,
-      amount_in_cents: amountInCents,
+      amount_in_cents: amountInCentsWholePesos,
       currency: this.appConfig.getCurrency(),
       reference,
+      customer_email: customer.getEmail(),
     };
 
     let checkoutResult;
@@ -99,7 +119,7 @@ export class CheckoutWithCreateTransactionService {
     for (const item of transactionProducts) {
       await this.updateStockProductUseCase.execute({
         id: item.productId,
-        amount: item.quantity,
+        amount: Math.floor(item.quantity),
       });
     }
 
@@ -131,7 +151,33 @@ export class CheckoutWithCreateTransactionService {
     if (!entity) {
       throw new Error('Transaction not found after create');
     }
-    const entityUpdated = entity.withStatus(finalStatus as TransactionStatus);
+    const normalizedStatus =
+      typeof finalStatus === 'string' ? finalStatus.toUpperCase() : finalStatus;
+    let entityUpdated = entity.withStatus(normalizedStatus as TransactionStatus);
+
+    if (normalizedStatus === TransactionStatus.APPROVED) {
+      const customerId = entity.getCustomerId();
+      const customer = await this.customerRepository.findById(customerId);
+      if (!customer) {
+        throw new BadRequestException(
+          'Cliente no encontrado para crear la entrega',
+        );
+      }
+      const address = customer.getAddress();
+      const city = customer.getCity();
+      if (!address?.trim() || !city?.trim()) {
+        throw new BadRequestException(
+          'El cliente debe tener dirección y ciudad registradas para completar la entrega',
+        );
+      }
+      const delivery = await this.deliveryRepository.create(
+        customerId,
+        address.trim(),
+        city.trim(),
+      );
+      entityUpdated = entityUpdated.withDeliveryId(delivery.id);
+    }
+
     const updated = await this.transactionRepository.update(entityUpdated);
 
     return this.toOutput(updated);

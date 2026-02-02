@@ -19,6 +19,8 @@ export class GetCustomerByIdService {
         id: customer.getId(),
         email: customer.getEmail(),
         fullName: customer.getFullName(),
+        address: customer.getAddress(),
+        city: customer.getCity(),
         createdAt: customer.getCreatedAt(),
       };
     }

@@ -15,9 +15,23 @@ export class CustomerAdapterRepository implements CustomerRepositoryPort {
     const customer = await this.prisma.customer.findUnique({
       where: { id },
     });
-
     if (!customer) return null;
-
     return this.customerMapper.toDomain(customer);
+  }
+
+  async findByEmail(email: string): Promise<CustomerEntity | null> {
+    const normalized = email?.trim().toLowerCase();
+    if (!normalized) return null;
+    const customer = await this.prisma.customer.findUnique({
+      where: { email: normalized },
+    });
+    if (!customer) return null;
+    return this.customerMapper.toDomain(customer);
+  }
+
+  async create(customer: CustomerEntity): Promise<CustomerEntity> {
+    const data = this.customerMapper.toPrismaCreate(customer);
+    const created = await this.prisma.customer.create({ data });
+    return this.customerMapper.toDomain(created);
   }
 }

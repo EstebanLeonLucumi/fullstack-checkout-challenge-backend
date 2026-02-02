@@ -27,13 +27,10 @@ export class ApiResponseInterceptor implements NestInterceptor {
                             message = Messages.PRODUCT_CREATED;
                             break;
                         case 201:
-                            message = Messages.PRODUCT_CREATED;
+                            message = Messages.CUSTOMER_CREATED;
                             break;
                         case 204:
                             message = Messages.PRODUCT_DELETED;
-                            break;
-                        case 200:
-                            message = Messages.STOCK_UPDATED;
                             break;
                         case 404:
                             message = Messages.PRODUCT_NOT_FOUND;

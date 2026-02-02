@@ -1,4 +1,4 @@
-export interface GetCustomerByIdOutputDto {
+export interface CreateCustomerOutputDto {
   id: string;
   email: string;
   fullName: string;

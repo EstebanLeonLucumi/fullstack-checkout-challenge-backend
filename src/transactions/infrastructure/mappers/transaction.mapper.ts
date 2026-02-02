@@ -30,7 +30,7 @@ export interface PrismaTransactionProductRow {
 }
 
 export interface PrismaTransactionWithProducts extends PrismaTransactionCreated {
-  products: PrismaTransactionProductRow[];
+  transactionProducts: PrismaTransactionProductRow[];
 }
 
 @Injectable()
@@ -39,7 +39,7 @@ export class TransactionMapper {
     tx: PrismaTransactionWithProducts,
   ): TransactionEntity {
     const currency = tx.currency as Currency;
-    const transactionProducts = tx.products.map((p) =>
+    const transactionProducts = (tx.transactionProducts ?? []).map((p) =>
       TransactionProduct.create({
         productId: p.productId,
         transactionId: p.transactionId,
@@ -78,6 +78,6 @@ export class TransactionMapper {
   }
 
   private toMoney(amount: number, currency: Currency): Money {
-    return Money.create(amount, currency);
+    return Money.create(Math.floor(Number(amount)), currency);
   }
 }

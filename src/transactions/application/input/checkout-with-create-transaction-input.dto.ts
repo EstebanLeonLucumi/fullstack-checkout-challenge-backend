@@ -8,7 +8,6 @@ export interface CheckoutDataDto {
     cvc: string;
     card_holder: string;
   };
-  customer_email: string;
   installments: number;
 }
 

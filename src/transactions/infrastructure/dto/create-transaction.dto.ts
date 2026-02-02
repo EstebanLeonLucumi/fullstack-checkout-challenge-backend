@@ -1,16 +1,19 @@
 import {
   IsArray,
+  IsInt,
   IsNotEmpty,
-  IsNumber,
   IsObject,
   IsOptional,
   IsString,
+  Min,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 
 export class MoneyDto {
-  @IsNumber()
+  @Transform(({ value }) => (typeof value === 'number' ? Math.floor(value) : Math.floor(Number(value) || 0)))
+  @IsInt()
+  @Min(0)
   amount: number;
 
   @IsString()
@@ -22,7 +25,9 @@ export class CreateTransactionItemDto {
   @IsNotEmpty()
   productId: string;
 
-  @IsNumber()
+  @Transform(({ value }) => (typeof value === 'number' ? Math.floor(value) : Math.floor(Number(value) || 0)))
+  @IsInt()
+  @Min(1)
   quantity: number;
 
   @IsObject()
@@ -30,7 +35,9 @@ export class CreateTransactionItemDto {
   @Type(() => MoneyDto)
   unitPrice: MoneyDto;
 
-  @IsNumber()
+  @Transform(({ value }) => (typeof value === 'number' ? Math.floor(value) : Math.floor(Number(value) || 0)))
+  @IsInt()
+  @Min(0)
   totalAmount: number;
 }
 

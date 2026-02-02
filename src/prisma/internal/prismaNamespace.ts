@@ -868,6 +868,8 @@ export const CustomerScalarFieldEnum = {
   id: 'id',
   email: 'email',
   full_name: 'full_name',
+  address: 'address',
+  city: 'city',
   createdAt: 'createdAt'
 } as const
 

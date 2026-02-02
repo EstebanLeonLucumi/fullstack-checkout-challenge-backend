@@ -9,4 +9,7 @@ export const Messages = {
   CHECKOUT_SUCCESS: 'Checkout successful',
   TRANSACTION_CREATED: 'Transaction created successfully',
   TRANSACTION_FOUND: 'Transaction found successfully',
+  CUSTOMER_CREATED: 'Cliente creado correctamente',
+  CUSTOMER_FOUND: 'Cliente encontrado correctamente',
+  EMAIL_ALREADY_EXISTS: 'El correo ya está registrado',
 };

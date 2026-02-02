@@ -20,18 +20,21 @@ export class CreateTransactionUseCase {
     const transactionProducts = input.transactionProducts.map((item) =>
       TransactionProduct.create({
         productId: item.productId,
-        quantity: item.quantity,
+        quantity: Math.floor(Number(item.quantity)),
         unitPrice: Money.create(
-          item.unitPrice.amount,
+          Math.floor(Number(item.unitPrice.amount)),
           item.unitPrice.currency as Currency,
         ),
-        totalAmount: item.totalAmount,
+        totalAmount: Math.floor(Number(item.totalAmount)),
       }),
     );
 
-    const baseFee = Money.create(input.baseFee.amount, input.baseFee.currency as Currency);
+    const baseFee = Money.create(
+      Math.floor(Number(input.baseFee.amount)),
+      input.baseFee.currency as Currency,
+    );
     const deliveryFee = Money.create(
-      input.deliveryFee.amount,
+      Math.floor(Number(input.deliveryFee.amount)),
       input.deliveryFee.currency as Currency,
     );
 

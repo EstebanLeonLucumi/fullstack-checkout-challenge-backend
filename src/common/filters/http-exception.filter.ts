@@ -36,6 +36,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
     switch (status) {
       case 404:
         return Messages.PRODUCT_NOT_FOUND;
+      case 409:
+        return Messages.EMAIL_ALREADY_EXISTS;
       case 400:
         return 'Bad Request';
       case 401:

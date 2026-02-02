@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsObject, IsString, ValidateNested } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsObject, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateCardTokenDto } from 'src/payment-provider/infrastructure/dto/create-card-token.dto';
 
@@ -8,10 +8,6 @@ export class CheckoutRequestDto {
   @ValidateNested()
   @Type(() => CreateCardTokenDto)
   credit_card: CreateCardTokenDto;
-
-  @IsString()
-  @IsNotEmpty()
-  customer_email: string;
 
   @IsNumber()
   @IsNotEmpty()

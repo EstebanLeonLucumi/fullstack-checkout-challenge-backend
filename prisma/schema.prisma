@@ -41,6 +41,9 @@ model Product {
   transactionProduct TransactionProduct[]
 }
 
+// Transaction: cabecera de la transacción.
+// Los ítems (línea de detalle) están en TransactionProduct; la relación se resuelve
+// por la FK transactionId en la tabla TransactionProduct (no hay columna extra en Transaction).
 model Transaction {
   id     String            @id @default(uuid())
   status TransactionStatus @default(PENDING)
@@ -63,9 +66,12 @@ model Transaction {
   customer Customer  @relation(fields: [customerId], references: [id])
   delivery Delivery? @relation(fields: [deliveryId], references: [id])
 
-  products TransactionProduct[]
+  // Ítems de la transacción (tabla TransactionProduct, FK transactionId → Transaction.id)
+  transactionProducts TransactionProduct[]
 }
 
+// TransactionProduct: ítem de una transacción (producto + cantidad, precios).
+// transactionId es la FK que relaciona con Transaction.
 model TransactionProduct {
   id            String @id @default(uuid())
   productId     String
@@ -83,10 +89,12 @@ model TransactionProduct {
 }
 
 model Customer {
-  id        String   @id @default(uuid())
-  email     String   @unique
+  id        String  @id @default(uuid())
+  email     String  @unique
   full_name String
-  
+  address   String?
+  city      String?
+
   createdAt DateTime @default(now())
 
   transactions Transaction[]

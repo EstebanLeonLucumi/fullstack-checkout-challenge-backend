@@ -10,14 +10,7 @@ const prisma = new PrismaClient({
 });
 
 async function main() {
-  const [mbappe, product] = await prisma.$transaction(async (tx) => {
-    const mbappe = await tx.customer.create({
-      data: {
-        email: 'mbappe@mail.com',
-        full_name: 'Kylian Mbappe',
-      },
-    });
-
+  const productSeed = await prisma.$transaction(async (tx) => {
     const product = await tx.product.createMany({
       data: [
         {
@@ -73,10 +66,10 @@ async function main() {
       ],
     });
 
-    return [mbappe, product];
+    return product;
   });
 
-  console.log([mbappe, product]);
+  console.log(productSeed);
 }
 
 main()

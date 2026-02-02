@@ -1,13 +1,14 @@
 import {
   IsArray,
+  IsInt,
   IsNotEmpty,
-  IsNumber,
   IsObject,
   IsOptional,
   IsString,
+  Min,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import { CheckoutRequestDto } from './checkout-request.dto';
 
 export class CheckoutTransactionItemDto {
@@ -15,7 +16,9 @@ export class CheckoutTransactionItemDto {
   @IsNotEmpty()
   productId: string;
 
-  @IsNumber()
+  @Transform(({ value }) => (typeof value === 'number' ? Math.floor(value) : Math.floor(Number(value) || 0)))
+  @IsInt()
+  @Min(1)
   quantity: number;
 }
 

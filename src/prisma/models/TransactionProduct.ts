@@ -319,7 +319,7 @@ export type TransactionProductCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   product: Prisma.ProductCreateNestedOneWithoutTransactionProductInput
-  transaction: Prisma.TransactionCreateNestedOneWithoutProductsInput
+  transaction: Prisma.TransactionCreateNestedOneWithoutTransactionProductsInput
 }
 
 export type TransactionProductUncheckedCreateInput = {
@@ -341,7 +341,7 @@ export type TransactionProductUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   product?: Prisma.ProductUpdateOneRequiredWithoutTransactionProductNestedInput
-  transaction?: Prisma.TransactionUpdateOneRequiredWithoutProductsNestedInput
+  transaction?: Prisma.TransactionUpdateOneRequiredWithoutTransactionProductsNestedInput
 }
 
 export type TransactionProductUncheckedUpdateInput = {
@@ -532,7 +532,7 @@ export type TransactionProductCreateWithoutProductInput = {
   totalAmount: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  transaction: Prisma.TransactionCreateNestedOneWithoutProductsInput
+  transaction: Prisma.TransactionCreateNestedOneWithoutTransactionProductsInput
 }
 
 export type TransactionProductUncheckedCreateWithoutProductInput = {
@@ -648,7 +648,7 @@ export type TransactionProductUpdateWithoutProductInput = {
   totalAmount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  transaction?: Prisma.TransactionUpdateOneRequiredWithoutProductsNestedInput
+  transaction?: Prisma.TransactionUpdateOneRequiredWithoutTransactionProductsNestedInput
 }
 
 export type TransactionProductUncheckedUpdateWithoutProductInput = {

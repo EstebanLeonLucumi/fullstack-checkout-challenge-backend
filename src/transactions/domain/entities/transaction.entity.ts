@@ -132,4 +132,21 @@ export class Transaction {
       new Date(),
     );
   }
+
+  withDeliveryId(deliveryId: string): Transaction {
+    return new Transaction(
+      this.id,
+      this.status,
+      this.customerId,
+      deliveryId,
+      this.externalTransactionId,
+      this.transactionProducts,
+      this.subtotal,
+      this.baseFee,
+      this.deliveryFee,
+      this.totalAmount,
+      this.createdAt,
+      new Date(),
+    );
+  }
 }

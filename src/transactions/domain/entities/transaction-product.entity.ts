@@ -18,9 +18,12 @@ export class TransactionProduct {
         totalAmount: number;
     }): TransactionProduct {
         if (!params.productId) throw new Error("productId is required");
-        if (!params.quantity) throw new Error("quantity is required");
         if (!params.unitPrice) throw new Error("unitPrice is required");
-        if (!params.totalAmount) throw new Error("totalAmount is required");
+
+        const quantity = Math.floor(Number(params.quantity));
+        const totalAmount = Math.floor(Number(params.totalAmount));
+        if (quantity < 1) throw new Error("quantity must be a positive integer");
+        if (totalAmount < 0) throw new Error("totalAmount cannot be negative");
 
         const transactionId = params.transactionId ?? '';
 
@@ -28,9 +31,9 @@ export class TransactionProduct {
             null,
             params.productId,
             transactionId,
-            params.quantity,
+            quantity,
             params.unitPrice,
-            params.totalAmount,
+            totalAmount,
         );
     }
 
