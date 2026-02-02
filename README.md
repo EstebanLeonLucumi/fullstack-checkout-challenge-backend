@@ -1,73 +1,410 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Backend API — Product Checkout with Payment Provider
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+REST API for a product store checkout flow: catalog, customers, credit-card payment (Sandbox), transactions, stock updates, and deliveries. Built with **NestJS**, **TypeScript**, **Prisma**, and **PostgreSQL**, following **Hexagonal Architecture** and **Ports & Adapters**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Table of Contents
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- [Overview](#overview)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Data Model](#data-model)
+- [API Endpoints](#api-endpoints)
+- [Environment Variables](#environment-variables)
+- [Installation & Running](#installation--running)
+- [Tests & Coverage](#tests--coverage)
+- [Project Structure](#project-structure)
+- [Business Flow](#business-flow)
+- [Security & Validation](#security--validation)
+- [Deployment](#deployment)
+- [References](#references)
 
-## Installation
+---
 
-```bash
-$ yarn install
+## Overview
+
+This backend supports a 5-step checkout flow:
+
+1. **Product page** — List products and stock.
+2. **Credit card & delivery** — Collect payment and delivery data.
+3. **Summary** — Show product amount, base fee, delivery fee, and payment action.
+4. **Final status** — Create transaction (PENDING), call payment provider, update transaction result, assign delivery, update stock.
+5. **Back to product page** — Show result and updated stock.
+
+The API exposes **products**, **customers**, **transactions**, and **deliveries**, with different HTTP methods (GET, POST) and validations. Sensitive data (e.g. card data) is not persisted; it is sent only to the payment provider (Sandbox).
+
+---
+
+## Tech Stack
+
+| Layer           | Technology                          |
+|----------------|-------------------------------------|
+| Runtime        | Node.js                             |
+| Framework      | NestJS                              |
+| Language       | TypeScript                          |
+| Database       | PostgreSQL                          |
+| ORM / Client   | Prisma                              |
+| Validation     | class-validator, class-transformer   |
+| HTTP Client    | Axios (@nestjs/axios)               |
+| Tests          | Jest                                |
+
+---
+
+## Architecture
+
+- **Hexagonal Architecture (Ports & Adapters):** Business logic lives in **application** (use cases, services) and **domain** (entities, value objects). **Infrastructure** implements ports (repositories, payment provider, config).
+- **Ports:** `ProductRepositoryPort`, `CustomerRepositoryPort`, `TransactionRepositoryPort`, `DeliveryRepositoryPort`, `PaymentProviderPort`, `AppConfigPort`, `OrderReferencePort`.
+- **Adapters:** Prisma repositories, Sandbox payment provider (HTTP), env-based config, order reference counter.
+- **Controllers** only map HTTP to application input and return application output; they do not contain business rules.
+- Use cases and services orchestrate domain logic and ports; errors are mapped to HTTP exceptions and centralized messages.
+
+---
+
+## Data Model
+
+Designed for: **stock**, **transactions**, **customers**, and **deliveries** with clear relationships.
+
+```
+┌─────────────────┐       ┌──────────────────────┐       ┌─────────────────┐
+│    Product      │       │  TransactionProduct │       │   Transaction   │
+├─────────────────┤       ├──────────────────────┤       ├─────────────────┤
+│ id (PK)         │◄──────│ productId (FK)       │       │ id (PK)         │
+│ name            │       │ transactionId (FK)   │──────►│ status          │
+│ description     │       │ quantity             │       │ subtotal        │
+│ amount, currency│       │ unitPrice, totalAmount│       │ baseFee         │
+│ image           │       └──────────────────────┘       │ deliveryFee     │
+│ stock           │                                       │ totalAmount     │
+│ createdAt       │                                       │ currency        │
+│ updatedAt       │                                       │ customerId (FK) │
+└─────────────────┘                                       │ deliveryId (FK) │
+                                                           │ externalTxId   │
+                                                           │ createdAt      │
+                                                           │ updatedAt      │
+                                                           └────────┬───────┘
+                                                                    │
+┌─────────────────┐       ┌─────────────────┐                     │
+│  OrderReference  │       │    Customer      │◄────────────────────┘
+│  Counter         │       ├─────────────────┤
+├─────────────────┤       │ id (PK)          │
+│ id = "singleton" │       │ email (unique)   │
+│ nextValue        │       │ full_name        │
+└─────────────────┘       │ address, city   │
+                            │ createdAt       │
+                            └────────┬───────┘
+                                     │
+                            ┌────────▼───────┐
+                            │    Delivery     │
+                            ├────────────────┤
+                            │ id (PK)        │
+                            │ customerId(FK) │
+                            │ address, city  │
+                            │ createdAt      │
+                            │ updatedAt      │
+                            └────────────────┘
 ```
 
-## Running the app
+**Enums:** `Currency` (COP, USD), `TransactionStatus` (PENDING, APPROVED, DECLINED, ERROR).
 
-```bash
-# development
-$ yarn run start
+**Notes:**
 
-# watch mode
-$ yarn run start:dev
+- `Transaction` has many `TransactionProduct` (line items); each line references one `Product`.
+- `Customer` has many `Transaction`s and many `Delivery`s. A transaction can have one `Delivery` when status is APPROVED.
+- `OrderReferenceCounter` is a single-row table used to generate consecutive order references (e.g. `order_001`, `order_002`).
 
-# production mode
-$ yarn run start:prod
+---
+
+## API Endpoints
+
+Base URL: `http://localhost:3000` (or your deployed URL).
+
+All successful responses use a consistent envelope when using the global interceptor:
+
+```json
+{
+  "statusCode": 200,
+  "message": "Product found successfully",
+  "data": { ... },
+  "timestamp": "2025-01-29T..."
+}
 ```
 
-## Test
+Error responses:
 
-```bash
-# unit tests
-$ yarn run test
-
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
+```json
+{
+  "statusCode": 400,
+  "message": "Validation failed",
+  "data": null,
+  "timestamp": "2025-01-29T..."
+}
 ```
 
-## Support
+### Products
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+| Method | Path            | Description                    | Request body | Response |
+|--------|-----------------|--------------------------------|--------------|----------|
+| GET    | `/products`    | List all products (with stock) | —            | `data`: array of products |
+| GET    | `/products/:id`| Get one product by id          | —            | `data`: product or 404   |
 
-## Stay in touch
+### Customers
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+| Method | Path                 | Description              | Request body | Response |
+|--------|----------------------|--------------------------|--------------|----------|
+| POST   | `/customers`         | Create customer          | JSON: email, fullName, address?, city? | `data`: customer, 201 |
+| GET    | `/customers/:id`    | Get customer by id       | —            | `data`: customer or 404 |
+| POST   | `/customers/by-email` | Get customer by email   | JSON: email  | `data`: customer or 404 |
+
+**Create customer body (example):**
+
+```json
+{
+  "email": "user@example.com",
+  "fullName": "John Doe",
+  "address": "Street 123",
+  "city": "Bogotá"
+}
+```
+
+### Transactions
+
+| Method | Path                 | Description                    | Request body | Response |
+|--------|----------------------|--------------------------------|--------------|----------|
+| POST   | `/transactions`      | Create transaction (manual)    | See below    | `data`: transaction |
+| POST   | `/transactions/checkout` | **Checkout**: create PENDING transaction, call payment provider, poll status, update transaction, create delivery if APPROVED, update stock | See below | `data`: created/updated transaction |
+
+**Checkout body (POST `/transactions/checkout`):**
+
+```json
+{
+  "checkout": {
+    "credit_card": {
+      "number": "4111111111111111",
+      "exp_month": "12",
+      "exp_year": "29",
+      "cvc": "123",
+      "card_holder": "John Doe"
+    },
+    "installments": 1
+  },
+  "transaction": {
+    "customerId": "uuid-of-customer",
+    "transactionProducts": [
+      { "productId": "uuid-of-product", "quantity": 2 }
+    ]
+  }
+}
+```
+
+Checkout flow (high level): create transaction (PENDING) → call payment provider with card + amount + reference → poll transaction status until APPROVED/DECLINED/ERROR or timeout → update transaction in DB → if APPROVED: create delivery (if customer has address/city), update product stock.
+
+### Payment provider (internal)
+
+| Method | Path                     | Description                    |
+|--------|---------------------------|--------------------------------|
+| POST   | `/payment-provider/checkout` | Execute checkout (card + amount, etc.) |
+
+---
+
+**Postman / Swagger**
+
+- **Postman Collection:** [Backend API Collection](https://web.postman.co/workspace/My-Workspace~63dd8361-bae1-4f4c-84f7-6933a27596b6/collection/16004267-5c22f977-c2ab-423c-bcb8-1a239f936048?action=share&source=copy-link&creator=16004267)
+- **Swagger / OpenAPI:** *(If you add Swagger, add the public URL here.)*
+
+Example for local: after running the app, you can import the endpoints above into Postman and set base URL to `http://localhost:3000`.
+
+---
+
+## Environment Variables
+
+Create a `.env` in the project root (see `.env.example` if present). Required and optional variables:
+
+| Variable                      | Required | Description |
+|------------------------------|----------|-------------|
+| `DATABASE_URL`               | Yes      | PostgreSQL connection string (e.g. `postgresql://user:pass@localhost:5432/dbname`) |
+| `PORT`                       | No       | Server port (default `3000`) |
+| `NODE_ENV`                   | No       | `development` \| `production` (affects error details in responses) |
+| `CORS_ORIGIN`                | No       | Allowed origins, comma-separated (e.g. `http://localhost:5173`). If omitted, all origins allowed (dev only). |
+| `CURRENCY`                   | No       | Default currency (e.g. `COP`) |
+| `BASE_FEE`                   | No       | Base fee amount (integer) |
+| `DELIVERY_FEE`               | No       | Delivery fee amount (integer) |
+| `PAYMENT_PROVIDER_BASE_URL`  | Yes*     | Payment provider API base URL (Sandbox UAT) |
+| `PAYMENT_PROVIDER_PUBLIC_KEY`| Yes*     | Public API key (Sandbox) |
+| `PAYMENT_PROVIDER_PRIVATE_KEY` | Yes*  | Private API key (Sandbox) |
+| `PAYMENT_PROVIDER_INTEGRITY_KEY` | Yes* | Integrity key (Sandbox) |
+
+\* Required for checkout; without them, payment provider calls will fail.
+
+---
+
+## Installation & Running
+
+**Prerequisites:** Node.js (v18+), Yarn (or npm), PostgreSQL, and (for Sandbox) the provided API keys and UAT base URL.
+
+1. **Clone and install**
+
+   ```bash
+   git clone <repository-url>
+   cd prueba-tecnica-backend
+   yarn install
+   ```
+
+2. **Database**
+
+   - Create a PostgreSQL database and set `DATABASE_URL` in `.env`.
+   - Or run PostgreSQL via Docker:
+
+     ```bash
+     docker-compose up -d
+     ```
+
+   - Generate Prisma client and run migrations:
+
+     ```bash
+     npx prisma generate
+     npx prisma migrate deploy
+     ```
+
+   - Seed products (dummy data):
+
+     ```bash
+     npx prisma db seed
+     ```
+
+     (If `package.json` has no `prisma.seed`, run the seed script manually, e.g. `npx ts-node prisma/seeder.ts` or as configured.)
+
+3. **Configure `.env`**
+
+   - Set `DATABASE_URL`, payment provider Sandbox URL and keys, and optionally `PORT`, `CORS_ORIGIN`, `BASE_FEE`, `DELIVERY_FEE`, `CURRENCY`.
+
+4. **Run the app**
+
+   ```bash
+   # Development
+   yarn run start:dev
+
+   # Production build + run
+   yarn run build
+   yarn run start:prod
+   ```
+
+   API base: `http://localhost:3000` (or the port you set).
+
+---
+
+## Tests & Coverage
+
+- **Unit tests:** Jest (specs next to source or in `src`).
+- **E2E:** `test/app.e2e-spec.ts` (Jest + Supertest).
+
+Commands:
+
+```bash
+# Unit tests
+yarn run test
+
+# Unit tests with coverage
+yarn run test:cov
+
+# E2E tests
+yarn run test:e2e
+```
+
+**Coverage results:** The evaluation rubric requires **more than 80% coverage** for Backend (and Frontend). After running `yarn run test:cov`, add the coverage summary to this README, for example:
+
+```text
+----------------------|---------|----------|---------|---------|
+File                  | % Stmts | % Branch | % Funcs | % Lines |
+----------------------|---------|----------|---------|---------|
+All files             |   xx.xx |    xx.xx |   xx.xx |   xx.xx |
+----------------------|---------|----------|---------|---------|
+```
+
+*(Paste here the actual output of `yarn run test:cov` or a screenshot/link to the coverage report.)*
+
+---
+
+## Project Structure
+
+```
+prueba-tecnica-backend/
+├── prisma/
+│   ├── schema.prisma      # Data model and enums
+│   ├── migrations/        # SQL migrations
+│   └── seeder.ts         # Seed products
+├── src/
+│   ├── common/           # Filters, interceptors, shared utils (e.g. messages)
+│   ├── config/           # App config (currency, fees)
+│   ├── database/         # Prisma module and service
+│   ├── products/         # Product domain, application, infrastructure
+│   ├── customer/         # Customer domain, application, infrastructure
+│   ├── transactions/     # Transaction, checkout, delivery, order reference
+│   ├── payment-provider/ # Payment provider port and Sandbox adapter
+│   ├── app.module.ts
+│   └── main.ts
+├── test/                 # E2E tests
+├── docker-compose.yml    # PostgreSQL for local dev
+├── package.json
+└── README.md
+```
+
+Each bounded context (e.g. `products`, `customer`, `transactions`, `payment-provider`) follows:
+
+- **domain/** — Entities, value objects, domain services.
+- **application/** — Use cases, input/output DTOs, ports (interfaces), application services.
+- **infrastructure/** — Controllers, DTOs for HTTP, adapters (repositories, external APIs), mappers.
+
+---
+
+## Business Flow
+
+1. **Product page** — Frontend calls `GET /products` or `GET /products/:id` to show catalog and stock.
+2. **Credit card & delivery** — User enters card (and delivery) data; frontend may create/load customer via `POST /customers` or `POST /customers/by-email`.
+3. **Summary** — Frontend shows product amount, base fee, delivery fee; user confirms.
+4. **Payment** — Frontend calls `POST /transactions/checkout` with `checkout` (card, installments) and `transaction` (customerId, transactionProducts). Backend:
+   - Creates a PENDING transaction and gets an order reference.
+   - Calls the payment provider (Sandbox) with card tokenization and payment.
+   - Polls transaction status until final state (APPROVED / DECLINED / ERROR) or timeout.
+   - Updates the transaction in DB; if APPROVED, creates delivery (if customer has address/city) and decrements product stock.
+5. **Result** — Backend returns the final transaction; frontend shows success/failure and redirects to product page (stock updated via next `GET /products` or `GET /products/:id`).
+
+---
+
+## Security & Validation
+
+- **Sensitive data:** Credit card data is not stored; it is sent only to the payment provider (Sandbox) over HTTPS. Logging interceptors mask fields such as `password`, `cvc`, `private`, `secret`.
+- **Validation:** Request bodies are validated with `class-validator`; invalid payloads return 400 with a single message (e.g. from a central `Messages` file).
+- **CORS:** Configurable via `CORS_ORIGIN`; in production, set explicit origins.
+- **Errors:** Global exception filter returns consistent JSON; in production, internal errors do not expose stack traces. All user-facing messages are centralized in English in `src/common/utils/messages.ts`.
+- **Database:** Prisma with parameterized queries; migrations for schema changes.
+
+*(Bonus: OWASP alignments, HTTPS, and security headers can be documented here if applied.)*
+
+---
+
+## Deployment
+
+The app listens on `process.env.PORT` (default `3000`), suitable for cloud platforms (e.g. AWS ECS/EKS, Lambda + HTTP, Railway, Render).
+
+- **Build:** `yarn run build` → output in `dist/`.
+- **Start:** `yarn run start:prod` (runs `node dist/src/main.js`).
+- **Database:** Run migrations and seed on the target DB using `DATABASE_URL` (public URL for the deployment environment).
+- **Environment:** Set all required env vars (including payment provider Sandbox keys and `CORS_ORIGIN`) in the hosting console.
+
+**Deployed API link:** *(Add the public URL of your deployed backend here, e.g. `https://your-api.railway.app` or `https://xxx.execute-api.region.amazonaws.com`.)*
+
+---
+
+## References
+
+- [NestJS](https://nestjs.com/)
+- [Prisma](https://www.prisma.io/)
+- [Payment provider — Colombia quick start](https://docs.wompi.co/docs/colombia/inicio-rapido/)
+- [Payment provider — Environments and keys](https://docs.wompi.co/docs/colombia/ambientes-y-llaves/)
+- [Paying with cards (support)](https://soporte.wompi.co/hc/es-419/articles/360057781394)
+
+---
 
 ## License
 
-Nest is [MIT licensed](LICENSE).
+UNLICENSED (see `package.json`).
