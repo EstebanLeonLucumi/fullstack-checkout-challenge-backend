@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ProductModule } from './products/product.module';
 import { TransactionModule } from './transactions/transaction.module';
+import { CustomerModule } from './customer/customer.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { HttpModule } from '@nestjs/axios';
 import { PaymentProviderModule } from './payment-provider/payment-provider.module';
@@ -10,6 +11,7 @@ import { PaymentProviderModule } from './payment-provider/payment-provider.modul
     ProductModule,
     PrismaModule,
     TransactionModule,
+    CustomerModule,
     HttpModule,
     PaymentProviderModule,
   ],

@@ -7,8 +7,6 @@ import { PrismaModule } from "src/prisma/prisma.module";
 import { ProductMapper } from "./infrastructure/mappers/product.mapper";
 import { PrismaService } from "src/prisma/prisma.service";
 import { UpdateStockProductUseCase } from "./application/use-cases/update-stock-product.use-case";
-import { UpdateStockProductService } from "./application/services/update-stock-product.service";
-import { UpdateStockMapper } from "./infrastructure/mappers/update-stock.mapper";
 import { GetProductByIdUseCase } from "./application/use-cases/get-product-by-id.use-case";
 import { GetProductByIdService } from "./application/services/get-product-by-id.service";
 import { GetProductByIdMapper } from "./infrastructure/mappers/get-product-by-id.mapper";
@@ -19,13 +17,11 @@ import { GetAllProductsUseCase } from "./application/use-cases/get-all-products.
     imports: [PrismaModule],
     providers: [
         PrismaService,
-        UpdateStockProductService,
         UpdateStockProductUseCase,
         GetAllProductsUseCase,
         GetProductByIdUseCase,
         GetProductByIdService,
         GetAllProductsService,
-        UpdateStockMapper,
         GetProductByIdMapper,
         CurrencyMapper,
         ProductMapper,
