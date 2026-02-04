@@ -40,25 +40,21 @@ export class TransactionController {
 
   @Post('checkout')
   async checkout(@Body() body: CheckoutWithCreateTransactionDto) {
-    try {
-      const input: CheckoutWithCreateTransactionInputDto = {
-        checkout: body.checkout,
-        transaction: {
-          customerId: body.transaction.customerId,
-          deliveryId: body.transaction.deliveryId ?? undefined,
-          transactionProducts: body.transaction.transactionProducts.map((item) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-          })),
-        },
-      };
-      const data = await this.checkoutWithCreateTransactionService.execute(input);
-      return {
-        data,
-        operation: 'CHECKOUT_SUCCESS',
-      };
-    } catch (error) {
-      throw error;
-    }
+    const input: CheckoutWithCreateTransactionInputDto = {
+      checkout: body.checkout,
+      transaction: {
+        customerId: body.transaction.customerId,
+        deliveryId: body.transaction.deliveryId ?? undefined,
+        transactionProducts: body.transaction.transactionProducts.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+        })),
+      },
+    };
+    const data = await this.checkoutWithCreateTransactionService.execute(input);
+    return {
+      status: data.status,
+      orderNumber: data.externalTransactionId,
+    };
   }
 }
