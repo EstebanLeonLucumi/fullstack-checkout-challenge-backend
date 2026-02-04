@@ -53,8 +53,11 @@ export class TransactionController {
     };
     const data = await this.checkoutWithCreateTransactionService.execute(input);
     return {
-      status: data.status,
-      orderNumber: data.externalTransactionId,
+      data: {
+        status: data.status,
+        orderNumber: data.externalTransactionId,
+      },
+      operation: 'CHECKOUT_SUCCESS',
     };
   }
 }
